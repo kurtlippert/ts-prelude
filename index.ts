@@ -25,4 +25,5 @@ export const Obj = {
 }
 
 const a = { a: 1, b: 2 }
-const b = Obj.get('c')(a)
+const b = Obj.get('c')(a) // Nothing
+const c = Obj.get('a')(a) // Just(1)
