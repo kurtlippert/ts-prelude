@@ -1,17 +1,25 @@
-import { Maybe, Nothing, Just } from "purify-ts/Maybe"
+import { Maybe as _Maybe, Nothing, Just } from "purify-ts/Maybe"
 import { List } from "purify-ts/List"
 import { Tuple } from "purify-ts/Tuple"
 import { pipe } from "fp-ts/function"
 
 // Math extensions
 
-export const Num = {
+export const Number = {
   add: (value1: number) => (value2: number) => value1 + value2,
 }
 
+// const add3: number = curry((a: number, b: number, c: number) => a + b + c)
+
 // additional 'Maybe' helpers
 
-export const FromMaybe = {
+export type Maybe<T> = _Maybe<T>
+
+// export const Nothing = M
+
+export const Maybe = {
+
+  empty: () => Nothing,
 
   withDefault: <T>(_default: T) => (maybe: Maybe<T>) =>
     maybe.orDefault(_default),
@@ -23,7 +31,7 @@ export const FromMaybe = {
     }),
 
   map: <T, U>(fn: (value: T) => U) => (maybe: Maybe<T>) =>
-    maybe.map(fn),
+    maybe.map(fn) as Maybe<U>,
 
   map2: <T, U, V>(fn: (value1: T) => (value2: U) => V) => (maybe1: Maybe<T>) => (maybe2: Maybe<U>) => {
     const result1 = maybe1.extract()
@@ -31,7 +39,7 @@ export const FromMaybe = {
     if (!!result1 && !!result2) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
-      return Just(fn(newResult1)(newResult2))
+      return Just(fn(newResult1)(newResult2)) as Maybe<V>
     }
     else {
       return Nothing
@@ -46,7 +54,7 @@ export const FromMaybe = {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
       const newResult3 = result3 as V
-      return Just(fn(newResult1)(newResult2)(newResult3))
+      return Just(fn(newResult1)(newResult2)(newResult3)) as Maybe<W>
     }
     else {
       return Nothing
@@ -63,7 +71,7 @@ export const FromMaybe = {
       const newResult2 = result2 as U
       const newResult3 = result3 as V
       const newResult4 = result4 as W
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4))
+      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)) as Maybe<X>
     }
     else {
       return Nothing
@@ -82,7 +90,7 @@ export const FromMaybe = {
       const newResult3 = result3 as V
       const newResult4 = result4 as W
       const newResult5 = result5 as X
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5))
+      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5)) as Maybe<Y>
     }
     else {
       return Nothing
@@ -263,7 +271,7 @@ export const String = {
     const parsedFloat = parseFloat(str)
     return Object.is(parsedFloat, NaN)
       ? Nothing
-      : Just(parsedFloat)
+      : Just(parsedFloat) as Maybe<number>
   },
 
   toList: (str: string) => str.split(""),
@@ -275,7 +283,7 @@ export const String = {
   uncons: (str: string) =>
     str.slice(0, 1) === ""
       ? Nothing
-      : Just(Tuple(str.slice(0, 1), str.slice(1, str.length))),
+      : Just(Tuple(str.slice(0, 1), str.slice(1, str.length))) as Maybe<Tuple<string, string>>,
 
   map: (tranformFunc: (char: string) => string) => (str: string) =>
     str.split("").map(tranformFunc).join(""),
@@ -300,9 +308,18 @@ export const String = {
   }
 }
 
-export const Obj = {
+export const Record = {
 
   empty: () => ({}),
+
+  member: <T>(key: string) => (record: Record<string, T>) =>
+    record[key] ? true : false,
+
+  size: <T>(record: Record<string, T>) =>
+  Object.keys(record).length,
+
+  keys: <T>(record: Record<string, T>) =>
+    Object.keys(record).sort(),
 
   values: <T>(record: Record<string, T>) =>
     Object.keys(record).sort().map(key => record[key]),
@@ -325,38 +342,103 @@ export const Obj = {
   // > Obj.get("Tom")(animals) == Just('Cat')
   // > Obj.get("Jerry")(animals) == Just('Mouse')
   // > Obj.get("Spike")(animals) == Nothing
-  get: <T>(key: string) => (obj: { [key: string]: T }) =>
-    obj[key]
-      ? Just(obj[key])
-      : Nothing
+  get: <T>(key: string) => (record: Record<string, T>) =>
+    record[key]
+      ? Just(record[key]) as Maybe<T>
+      : Nothing,
+
+  insert: <T>(key: string) => (value: T) => (record: Record<string, T>) =>
+    ({ ...record, [key]: value }),
+
+  remove: <T>(key: string) => (record: Record<string, T>) =>
+    Object.keys(record).reduce(
+      (acc, cur) => cur === key
+        ? acc
+        : ({ ...acc, [cur]: record[cur] }),
+    {} as Record<string, T>),
+
+  /**
+   * Attempts to update record value at @param key with @param alterFn
+   * If it fails, nothing happens, otherwise the value is updated
+   */
+  update: <T>(key: string) => (alterFn: (maybeValue: Maybe<T>) => Maybe<T>) => (record: Record<string, T>) =>
+    Object.keys(record).reduce(
+      (acc, cur) => {
+        if (cur === key) {
+          // check result of alter function
+          const result = alterFn(Just(record[cur]))
+          return result.isNothing()
+            ? { ...acc, [cur]: record[cur] }
+            : {
+                ...acc,
+                [cur]: result.extract() as T // must be T since we checked for `Nothing`
+              }
+        } else {
+          return { ...acc, [cur]: record[cur] }
+        }
+      },
+    {} as Record<string, T>),
 }
 
 // tests
 
-// const animals = Obj.fromList([ Tuple('Tom', 'Cat'), Tuple('Jerry', 'Mouse') ])
-const animals = Obj.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
-const getTom = Obj.get('Tom')(animals) // -> Just('Tom')
+const animals = Record.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
+const getTom = Record.get('Tom')(animals) // -> Just('Tom')
+const getValues = Record.values({1: 'cat', 2: 'dog'})
+const objUpdate = Record.update<string>('a_first')(x => Maybe.empty())({ 'a': 'thing'})
+const objUpdate_1 = Record.update<string>('a_first')(Maybe.map(String.right(2)))(animals)
+
+// ts doesn't know what the generic 'T' type should be for the alter function, so this won't compile
+// this would be similar to the Haskell or Elm compiler yelling at you to provide a type annotation
+// const objUpdate_2 = Record.update('a_first')(Maybe.map(String.right(2)))(animals)
+
+// this will fail to compile because the generic type (`number`) doesn't fit with the alter function
+// also, it doesn't fit with the `animals` record, so double-fail
+// const objUpdate_3 = Record.update<number>('a_first')(Maybe.map(String.right(2)))(animals)
+
+// the generic annotation is correct, and the alter function is correct (it uses string), but the 
+// record we are operating against isn't correct
+// const objUpdate_4 = Record.update<string>('a_first')(Maybe.map(String.right(2)))(['a', 'b', 'c'])
+
+// the generic annotation matches the alter function (`Maybe<number>`), but the `animals` Record
+// expects `Record<string, number>` (due to the `number` generic) but gets `Record<string, string>`
+// from animals instead
+// const objUpdate_5 = Record.update<number>('a_first')(Maybe.map(Number.add(2)))(animals)
+
+// update function with pipe
+// kinda messy
+const objUpdate_6 = pipe(animals, Record.update<string>('Jerry')(Maybe.map(String.right(2))))
+
+// update function with pipe and accessor
+// a litte better
+const accessor = Record.update<string>('Jerry')
+const objUpdate_7 = pipe(animals, accessor(Maybe.map(String.right(2))))
+
+// update function with pipe and composed update
+// probably best
+const objUpdate_8 = pipe(String.right(2), Maybe.map, Record.update<string>('Jerry'))
+const updateResult = objUpdate_8(animals)
 
 const toValidMonth = (month: number) =>
   1 <= month && month <= 12
-    ? Just(month)
+    ? Just(month) 
     : Nothing
 
 // w/o using pipe
 const parseMonth = (userInput: string) =>
   String.toNumber(userInput).chain(toValidMonth)
+  // Maybe.andThen(toValidMonth, String.toNumber(userInput))
 
 // using pipe
 const parseMonth_p = (userInput: string) =>
-  pipe(userInput, String.toNumber, FromMaybe.andThen(toValidMonth))
+  pipe(userInput, String.toNumber, Maybe.andThen(toValidMonth))
 
 // 3
-const fromMaybeMapTest_1 = FromMaybe.map(Math.sqrt)(Just(9))
-const fromMaybeMapTest_1p = pipe(Just(9), FromMaybe.map(Math.sqrt))
+const fromMaybeMapTest_1 = Maybe.map(Math.sqrt)(Just(9))
+const fromMaybeMapTest_1p = pipe(Just(9), Maybe.map(Math.sqrt))
 
 // this one reads better but its generally more flexible to use `pipe`
 const fromMaybeMapTest_1a = Just(9).map(Math.sqrt)
 
 // Nothing
-const fromMaybeMapTest_2 = FromMaybe.map(Math.sqrt)(Nothing)
-
+const fromMaybeMapTest_2 = Maybe.map(Math.sqrt)(Nothing)
