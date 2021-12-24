@@ -1,4 +1,4 @@
-import { Maybe as _Maybe, Nothing, Just } from "purify-ts/Maybe"
+// import { Maybe as _Maybe, Nothing, Just } from "purify-ts/Maybe"
 import { List } from "purify-ts/List"
 import { Tuple } from "purify-ts/Tuple"
 import { pipe } from "fp-ts/function"
@@ -9,93 +9,134 @@ export const Number = {
   add: (value1: number) => (value2: number) => value1 + value2,
 }
 
+// Maybe
+
+enum MaybeType {
+  Just = 'maybe-type__just',
+  Nothing = 'maybe-type__nothing',
+}
+
+interface Just<T> {
+  type: typeof MaybeType.Just
+  value: T
+}
+
+interface Nothing {
+  type: typeof MaybeType.Nothing
+}
+
+type Maybe<T>
+  = Just<T>
+  | Nothing
+
+const nothing = (): Nothing => ({
+  type: MaybeType.Nothing,
+})
+
+const just = <T>(value: T): Just<T> => ({
+  type: MaybeType.Just,
+  value,
+})
+
+const Nothing = nothing()
+const Just = <T>(value: T) => just(value)
+
+
 // const add3: number = curry((a: number, b: number, c: number) => a + b + c)
 
 // additional 'Maybe' helpers
 
-export type Maybe<T> = _Maybe<T>
+// export type Maybe<T> = _Maybe<T>
 
 // export const Nothing = M
 
 export const Maybe = {
 
-  empty: () => Nothing,
+  empty: Nothing,
 
-  withDefault: <T>(_default: T) => (maybe: Maybe<T>) =>
-    maybe.orDefault(_default),
+  withDefault: <T>(_default: T) => (m1: Maybe<T>): T =>
+    m1.type === MaybeType.Just
+      ? m1.value
+      : _default,
 
-  andThen: <T, U>(callback: (value: T) => Maybe<U>) => (nextMaybe: Maybe<T>) =>
-    nextMaybe.caseOf({
-      Just: callback,
-      Nothing: () => Nothing
-    }),
+  map: <T, U>(fn: (p1: T) => U) => (m1: Maybe<T>): Maybe<U> => {
+    const result = m1.type === MaybeType.Just ? m1.value : undefined
+    if (!!result) {
+      const newResult = result as T
+      return Just(fn(newResult))
+    } else {
+      return Nothing
+    }
+  },
 
-  map: <T, U>(fn: (value: T) => U) => (maybe: Maybe<T>) =>
-    maybe.map(fn) as Maybe<U>,
-
-  map2: <T, U, V>(fn: (value1: T) => (value2: U) => V) => (maybe1: Maybe<T>) => (maybe2: Maybe<U>) => {
-    const result1 = maybe1.extract()
-    const result2 = maybe2.extract()
+  map2: <T, U, V>(fn: (p1: T) => (p2: U) => V) => (m1: Maybe<T>) => (m2: Maybe<U>): Maybe<V> => {
+    const result1 = m1.type === MaybeType.Just ? m1.value : undefined
+    const result2 = m2.type === MaybeType.Just ? m2.value : undefined
     if (!!result1 && !!result2) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
-      return Just(fn(newResult1)(newResult2)) as Maybe<V>
+      return Just(fn(newResult1)(newResult2))
     }
     else {
       return Nothing
     }
   },
 
-  map3: <T, U, V, W>(fn: (value1: T) => (value2: U) => (value3: V) => W) => (maybe1: Maybe<T>) => (maybe2: Maybe<U>) => (maybe3: Maybe<V>) => {
-    const result1 = maybe1.extract()
-    const result2 = maybe2.extract()
-    const result3 = maybe3.extract()
+  map3: <T, U, V, W>(fn: (p1: T) => (p2: U) => (p3: V) => W) => (m1: Maybe<T>) => (m2: Maybe<U>) => (m3: Maybe<V>): Maybe<W> => {
+    const result1 = m1.type === MaybeType.Just ? m1.value : undefined
+    const result2 = m2.type === MaybeType.Just ? m2.value : undefined
+    const result3 = m3.type === MaybeType.Just ? m3.value : undefined
     if (!!result1 && !!result2 && !!result3) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
       const newResult3 = result3 as V
-      return Just(fn(newResult1)(newResult2)(newResult3)) as Maybe<W>
+      return Just(fn(newResult1)(newResult2)(newResult3))
     }
     else {
       return Nothing
     }
   },
 
-  map4: <T, U, V, W, X>(fn: (value1: T) => (value2: U) => (value3: V) => (value4: W) => X) => (maybe1: Maybe<T>) => (maybe2: Maybe<U>) => (maybe3: Maybe<V>) => (maybe4: Maybe<W>) => {
-    const result1 = maybe1.extract()
-    const result2 = maybe2.extract()
-    const result3 = maybe3.extract()
-    const result4 = maybe4.extract()
+  map4: <T, U, V, W, X>(fn: (p1: T) => (p2: U) => (p3: V) => (p4: W) => X) => (m1: Maybe<T>) => (m2: Maybe<U>) => (m3: Maybe<V>) => (m4: Maybe<W>): Maybe<X> => {
+    const result1 = m1.type === MaybeType.Just ? m1.value : undefined
+    const result2 = m2.type === MaybeType.Just ? m2.value : undefined
+    const result3 = m3.type === MaybeType.Just ? m3.value : undefined
+    const result4 = m4.type === MaybeType.Just ? m4.value : undefined
     if (!!result1 && !!result2 && !!result3 && !!result4) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
       const newResult3 = result3 as V
       const newResult4 = result4 as W
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)) as Maybe<X>
+      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4))
     }
     else {
       return Nothing
     }
   },
 
-  map5: <T, U, V, W, X, Y>(fn: (value1: T) => (value2: U) => (value3: V) => (value4: W) => (value5: X) => Y) => (maybe1: Maybe<T>) => (maybe2: Maybe<U>) => (maybe3: Maybe<V>) => (maybe4: Maybe<W>) => (maybe5: Maybe<X>) => {
-    const result1 = maybe1.extract()
-    const result2 = maybe2.extract()
-    const result3 = maybe3.extract()
-    const result4 = maybe4.extract()
-    const result5 = maybe5.extract()
+  map5: <T, U, V, W, X, Y>(fn: (p1: T) => (p2: U) => (p3: V) => (p4: W) => (p5: X) => Y) => (m1: Maybe<T>) => (m2: Maybe<U>) => (m3: Maybe<V>) => (m4: Maybe<W>) => (m5: Maybe<X>): Maybe<Y> => {
+    const result1 = m1.type === MaybeType.Just ? m1.value : undefined
+    const result2 = m2.type === MaybeType.Just ? m2.value : undefined
+    const result3 = m3.type === MaybeType.Just ? m3.value : undefined
+    const result4 = m4.type === MaybeType.Just ? m4.value : undefined
+    const result5 = m5.type === MaybeType.Just ? m5.value : undefined
     if (!!result1 && !!result2 && !!result3 && !!result4 && !!result5) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
       const newResult3 = result3 as V
       const newResult4 = result4 as W
       const newResult5 = result5 as X
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5)) as Maybe<Y>
+      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5))
     }
     else {
       return Nothing
     }
   },
+
+  andThen: <T, U>(callback: (p1: T) => Maybe<U>) => (m1: Maybe<T>) =>
+    m1.type === MaybeType.Just
+      ? callback
+      : () => Nothing,
 }
 
 // String Helpers
@@ -261,17 +302,19 @@ export const String = {
   },
 
   isNumber: (str: string) =>
-    Object.is(parseFloat(str), NaN)
-      ? false
-      : true,
+    /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/.test(str),
+    // /^-?\d+$/.test(str),
+    // Object.is(parseFloat(str), NaN)
+    //   ? false
+    //   : true,
 
   fromNumber: (num: number) => num.toString(),
 
-  toNumber: (str: string) => {
+  toNumber: (str: string): Maybe<number> => {
     const parsedFloat = parseFloat(str)
     return Object.is(parsedFloat, NaN)
       ? Nothing
-      : Just(parsedFloat) as Maybe<number>
+      : Just(parsedFloat)
   },
 
   toList: (str: string) => str.split(""),
@@ -280,10 +323,10 @@ export const String = {
 
   cons: (toPrepend: string) => (str: string) => toPrepend + str,
 
-  uncons: (str: string) =>
+  uncons: (str: string): Maybe<Tuple<string, string>> =>
     str.slice(0, 1) === ""
       ? Nothing
-      : Just(Tuple(str.slice(0, 1), str.slice(1, str.length))) as Maybe<Tuple<string, string>>,
+      : Just(Tuple(str.slice(0, 1), str.slice(1, str.length))),
 
   map: (tranformFunc: (char: string) => string) => (str: string) =>
     str.split("").map(tranformFunc).join(""),
@@ -302,10 +345,24 @@ export const String = {
   foldr: <T>(foldFn: (p1: string) => (p2: T) => T) => (accumulator: T) => (str: string): T => {
     const chars = str.split("")
     for (let i = chars.length - 1; i >= 0; --i) {
-      accumulator = foldFn(List.at(i, chars).orDefault(""))(accumulator)
+      accumulator = foldFn(chars[i])(accumulator)
     }
     return accumulator
-  }
+  },
+
+  any: (testFn: (char: string) => boolean) => (str: string): boolean =>
+    str.split("").some(testFn),
+
+  /**
+   * Determine whether **all** characters pass the test.
+   * 
+   * @example
+   * all(isDigit)("90210") === True
+   * all(isDigit)("R2-D2") === True
+   * all(isDigit)("heart") === True
+   */
+  all: (testFn: (char: string) => boolean) => (str: string): boolean =>
+    str.split("").every(testFn)
 }
 
 export const Record = {
@@ -342,42 +399,42 @@ export const Record = {
   // > Obj.get("Tom")(animals) == Just('Cat')
   // > Obj.get("Jerry")(animals) == Just('Mouse')
   // > Obj.get("Spike")(animals) == Nothing
-  get: <T>(key: string) => (record: Record<string, T>) =>
+  get: <T>(key: string) => (record: Record<string, T>): Maybe<T> =>
     record[key]
-      ? Just(record[key]) as Maybe<T>
+      ? Just(record[key])
       : Nothing,
 
-  insert: <T>(key: string) => (value: T) => (record: Record<string, T>) =>
+  insert: <T>(key: string) => (value: T) => (record: Record<string, T>): Record<string, T> =>
     ({ ...record, [key]: value }),
 
-  remove: <T>(key: string) => (record: Record<string, T>) =>
+  remove: <T>(key: string) => (record: Record<string, T>): Record<string, T> =>
     Object.keys(record).reduce(
       (acc, cur) => cur === key
         ? acc
         : ({ ...acc, [cur]: record[cur] }),
-    {} as Record<string, T>),
+    {}),
 
   /**
    * Attempts to update record value at @param key with @param alterFn
    * If it fails, nothing happens, otherwise the value is updated
    */
-  update: <T>(key: string) => (alterFn: (maybeValue: Maybe<T>) => Maybe<T>) => (record: Record<string, T>) =>
+  update: <T>(key: string) => (alterFn: (maybeValue: Maybe<T>) => Maybe<T>) => (record: Record<string, T>): Record<string, T> =>
     Object.keys(record).reduce(
       (acc, cur) => {
         if (cur === key) {
           // check result of alter function
           const result = alterFn(Just(record[cur]))
-          return result.isNothing()
+          return result.type === MaybeType.Nothing
             ? { ...acc, [cur]: record[cur] }
             : {
                 ...acc,
-                [cur]: result.extract() as T // must be T since we checked for `Nothing`
+                [cur]: result.value // must be T since we checked for `Nothing`
               }
         } else {
           return { ...acc, [cur]: record[cur] }
         }
       },
-    {} as Record<string, T>),
+    {}),
 }
 
 // tests
@@ -385,7 +442,7 @@ export const Record = {
 const animals = Record.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
 const getTom = Record.get('Tom')(animals) // -> Just('Tom')
 const getValues = Record.values({1: 'cat', 2: 'dog'})
-const objUpdate = Record.update<string>('a_first')(x => Maybe.empty())({ 'a': 'thing'})
+const objUpdate = Record.update<string>('a_first')(x => Nothing)({ 'a': 'thing'})
 const objUpdate_1 = Record.update<string>('a_first')(Maybe.map(String.right(2)))(animals)
 
 // ts doesn't know what the generic 'T' type should be for the alter function, so this won't compile
@@ -426,8 +483,9 @@ const toValidMonth = (month: number) =>
 
 // w/o using pipe
 const parseMonth = (userInput: string) =>
-  String.toNumber(userInput).chain(toValidMonth)
-  // Maybe.andThen(toValidMonth, String.toNumber(userInput))
+  // String.toNumber(userInput).chain(toValidMonth)
+  // Maybe.andThen(toValidMonth)(String.toNumber(userInput))
+  pipe(String.toNumber(userInput), Maybe.andThen(toValidMonth))
 
 // using pipe
 const parseMonth_p = (userInput: string) =>
@@ -438,7 +496,8 @@ const fromMaybeMapTest_1 = Maybe.map(Math.sqrt)(Just(9))
 const fromMaybeMapTest_1p = pipe(Just(9), Maybe.map(Math.sqrt))
 
 // this one reads better but its generally more flexible to use `pipe`
-const fromMaybeMapTest_1a = Just(9).map(Math.sqrt)
+// const fromMaybeMapTest_1a = Just(9).map(Math.sqrt)
+const fromMaybeMapTest_1a = Maybe.map(Math.sqrt)(Just(9))
 
 // Nothing
 const fromMaybeMapTest_2 = Maybe.map(Math.sqrt)(Nothing)
