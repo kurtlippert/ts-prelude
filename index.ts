@@ -1,58 +1,228 @@
-// import { Maybe as _Maybe, Nothing, Just } from "purify-ts/Maybe"
-import { List } from "purify-ts/List"
-import { Tuple } from "purify-ts/Tuple"
-import { pipe } from "fp-ts/function"
+// deno-lint-ignore-file no-explicit-any
+//
+// Disable `no-explicit-any` lint rule for this file.
+// This is b/c we're stretching the TypeScript type system in this file
+// as it is. Use of `any` is to get around JS-related limitations.
+// But in practice (and for use in apps), we would want to keep this rule
 
-// Math extensions
+import { pipe } from "https://deno.land/x/fp_ts/function.ts"
 
-export const Number = {
-  add: (value1: number) => (value2: number) => value1 + value2,
+/**
+ * Overload of built-in `boolean` type.
+ * Why? In case we ever want to overload the built-in `boolean` type
+ * Buuut... mainly for fun. This `Bool` type matches more w/ Elm
+ * (which was half the point anyway)
+ */
+export type Bool = boolean
+
+/**
+ * Overload of built-in `boolean` type.
+ * Add pipe-able `Bool` functions w/o naming clash
+ */
+export const Bool = {
+  or: (left: Bool) => (right: Bool) => left || right,
+  and: (left: Bool) => (right: Bool) => left && right,
+  not: (cond: Bool) => !cond,
+  xor: (left: Bool) => (right: Bool) =>
+    ((left as any)^(right as any)) === 1
+}
+
+/**
+ * Order-able.
+ * Anything that can be sorted
+ */
+export type Ord
+  = string
+  | number
+  | Date
+  | [Ord, Ord]
+  | Ord[]
+
+/**
+ * Order-able.
+ * Anything that can be sorted
+ */
+export const Ord = {
+  compare: <T>(a: Ord & T, b: Ord & T): number => {
+    // Shouldn't be necessary to check a _and_ b.
+    // If the type system is doing it's job they need to be the same type
+    // But helpful for the reader maybe?
+
+    if (typeof a === "string" && typeof b === "string") {
+      return a.localeCompare(b)
+    }
+    else if (typeof a === "number" && typeof b === "number") {
+      return a - b
+    }
+    else if (a instanceof Date && b instanceof Date) {
+      // typescript doesn't know how to deal with date math
+      // so we have to cast to `any`
+      // deno-lint-ignore no-explicit-any
+      return (a as any) - (b as any)
+    }
+
+    // sort by the first element in tuple / array
+    else if (a instanceof Array && b instanceof Array) {
+
+      // undefined or empty arrays will take the bottom of the sort order
+      // (though `undefined` shouldn't be possible if the type system
+      //  is doing it's job)
+      if (!a || a.length === 0) {
+        return -Infinity
+      }
+      else if (!b || b.length === 0) {
+        return Infinity
+      }
+
+      if (typeof a[0] === "string" && typeof b[0] === "string") {
+        // check length if first elements are the same, longer arrays sort last
+        if (a[0].localeCompare(b[0]) === 0) {
+          return a.length - b.length
+        }
+        else {
+          return a[0].localeCompare(b[0])
+        }
+      }
+      else if (typeof a[0] === "number" && typeof b[0] === "number") {
+        // check length if first elements are the same, longer arrays sort last
+        if (a[0] - b[0] === 0) {
+          return a.length - b.length
+        }
+        else {
+          return a[0] - b[0]
+        }
+      }
+      else if (a[0] instanceof Date && b[0] instanceof Date) {
+        // check length if first elements are the same, longer arrays sort last
+        // deno-lint-ignore no-explicit-any
+        if ((a[0] as any) - (b[0] as any) === 0) {
+          return a.length - b.length
+        }
+        else {
+          // deno-lint-ignore no-explicit-any
+          return (a[0] as any) - (b[0] as any)
+        }
+      }
+    }
+    return 0
+  },
+}
+
+/**
+ * inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Tuple.hs
+ */
+export type Tuple<T, U> = [T, U]
+
+/**
+ * inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Tuple.hs
+ */
+export const Tuple = {
+
+  /**
+   * Create a 2-tuple.
+   * 
+   * NOTE: generally, you can use `[fst, snd]` syntax to produce tuples.
+   * But you might want to use this function as part of a pipeable chain,
+   * so partial application might be advantageous. It also informs the 
+   * reader of intent.
+   *
+   * @example
+   * pair(3)(4) == [3, 4]
+   * 
+   * const zip = <T, U>(xs: T[]) => (ys: U[]): [U, T][] =>
+   *   List.map2(Tuple.pair(xs)(ys))
+   */
+  pair: <T, U>(fst: T) => (snd: U): Tuple<T, U> =>
+    [fst, snd],
+
+  first: <T, U>(t: Tuple<T, U>): T =>
+    t[0],
+
+  second: <T, U>(t: Tuple<T, U>): U =>
+    t[1],
+
+  mapFirst: <T, U, X>(mapFst: (fst: T) => X) => (t: Tuple<T, U>): Tuple<X, U> =>
+    [mapFst(t[0]), t[1]],
+
+  mapSecond: <T, U, Y>(mapSnd: (snd: U) => Y) => (t: Tuple<T, U>): Tuple<T, Y> =>
+    [t[0], mapSnd(t[1])],
+
+  mapBoth: <T, U, X, Y>(mapFst: (fst: T) => X) => (mapSnd: (snd: U) => Y) => (t: Tuple<T, U>): Tuple<X, Y> =>
+    [mapFst(t[0]), mapSnd(t[1])]
+}
+
+/**
+ * There is a built-in `Math` module, but we're missing partial application
+ * and pipe-able math operators.
+ * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Basics.hs
+ */
+export type Num = number
+
+/**
+ * There is a built-in `Math` module, but we're missing partial application
+ * and pipe-able math operators.
+ * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Basics.hs
+ */
+export const Num = {
+  add: (value1: Num) => (value2: Num) => value1 + value2,
 }
 
 // Maybe
+// 
+// imp: https://engineering.dollarshaveclub.com/typescript-maybe-type-and-module-627506ecc5c8 
+// inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Maybe.hs
 
-enum MaybeType {
+export enum MaybeType {
   Just = 'maybe-type__just',
   Nothing = 'maybe-type__nothing',
 }
 
-interface Just<T> {
+/**
+ * Holds some value (a value in a box!)
+ */
+export interface Just<T> {
   type: typeof MaybeType.Just
   value: T
 }
 
-interface Nothing {
+/**
+ * Represents the absence of a value
+ */
+export interface Nothing {
   type: typeof MaybeType.Nothing
 }
 
-type Maybe<T>
+/**
+ * May contain a value.
+ * Useful replacement for uncertainty in TypeScript.
+ */
+export type Maybe<T>
   = Just<T>
   | Nothing
 
-const nothing = (): Nothing => ({
-  type: MaybeType.Nothing,
-})
+/**
+ * `Nothing` constructor. Creates a `Nothing`
+ */
+export const Nothing: Nothing = {
+  type: MaybeType.Nothing
+}
 
-const just = <T>(value: T): Just<T> => ({
+/**
+ * `Just` constructor. 'Boxes' a value
+ * 
+ * @param value the value to 'box'
+ * @returns 'boxed' value
+ */
+export const Just = <T>(value: T): Just<T> => ({
   type: MaybeType.Just,
   value,
 })
 
-const Nothing = nothing()
-const Just = <T>(value: T) => just(value)
-
-
-// const add3: number = curry((a: number, b: number, c: number) => a + b + c)
-
-// additional 'Maybe' helpers
-
-// export type Maybe<T> = _Maybe<T>
-
-// export const Nothing = M
-
+/**
+ * May contain a value.
+ * Useful replacement for uncertainty in TypeScript.
+ */
 export const Maybe = {
-
-  empty: Nothing,
 
   withDefault: <T>(_default: T) => (m1: Maybe<T>): T =>
     m1.type === MaybeType.Just
@@ -61,6 +231,7 @@ export const Maybe = {
 
   map: <T, U>(fn: (p1: T) => U) => (m1: Maybe<T>): Maybe<U> => {
     const result = m1.type === MaybeType.Just ? m1.value : undefined
+    // deno-lint-ignore no-extra-boolean-cast
     if (!!result) {
       const newResult = result as T
       return Just(fn(newResult))
@@ -139,11 +310,21 @@ export const Maybe = {
       : () => Nothing,
 }
 
-// String Helpers
-// to replace those found w/ `lodash` that don't really support `Maybe`
-// inspired by https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Text.hs
+/**
+ * `Str` overloads built-in `string`, but this way we can add what we want 
+ * w/o worrying about a clash between the two.
+ * 
+ * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Text.hs
+ */
+export type Str = string
 
-export const String = {
+/**
+ * `Str` overloads built-in `string`, but this way we can add what we want 
+ * w/o worrying about a clash between the two.
+ * 
+ * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Text.hs
+ */
+export const Str = {
 
   /**
    * Determine if a string is empty.
@@ -152,7 +333,7 @@ export const String = {
    * isEmpty("") === true
    * isEmpty("the world") === false
    */
-  isEmpty: (str: string) => str.length === 0,
+  isEmpty: (str: Str) => str.length === 0,
 
   /**
    * Get the length of a string.
@@ -161,7 +342,7 @@ export const String = {
    * length("innumerable") === 11
    * length("") === 0
    */
-  length: (str: string) => str.length,
+  length: (str: Str) => str.length,
 
   /**
    * Reverse a string.
@@ -169,8 +350,8 @@ export const String = {
    * @example
    * reverse("stressed") === "desserts"
    */
-  reverse: (str: string) =>
-    str.split("").reduce((acc: string[], cur: string) => [cur, ...acc], []).join(""),
+  reverse: (str: Str) =>
+    str.split("").reduce((acc: Str[], cur: Str) => [cur, ...acc], []).join(""),
 
   /**
    * Repeat a string /n/ times.
@@ -180,7 +361,7 @@ export const String = {
    * const repeatThree = repeat(3)
    * repeatThree("ha") === "hahaha"
    */
-  repeat: (thisMany: number) => (str: string) => str.repeat(thisMany),
+  repeat: (thisMany: Num) => (str: Str) => str.repeat(thisMany),
 
   // === BUILDING AND SPLITTING ===
 
@@ -192,7 +373,7 @@ export const String = {
    * const prependButter = append("butter")
    * prependButter("fly") === "butterfly"
    */
-  append: (leftStr: string) => (rightStr: string) => leftStr + rightStr,
+  append: (leftStr: Str) => (rightStr: Str) => leftStr + rightStr,
 
   /**
    * Concatenate may strings into one.
@@ -200,7 +381,7 @@ export const String = {
    * @example
    * concat(["never", "the", "less"]) === "nevertheless"
    */
-  concat: (strList: string[]) => strList.join(""),
+  concat: (strList: List<Str>) => strList.join(""),
 
   /**
    * Split a string using a given separator.
@@ -211,7 +392,7 @@ export const String = {
    * const splitComma = split(",")
    * splitComma("cat,dog,cow") === ["cat", "dog", "cow"]
    */
-  split: (separator: string) => (str: string) => str.split(separator),
+  split: (separator: Str) => (str: Str) => str.split(separator),
 
   /**
    * Put many strings together with a given separator
@@ -224,7 +405,7 @@ export const String = {
    * const joinSlash = join("/")
    * joinSlash(["home", "kurt", "Desktop"]) === "home/kurt/Desktop"
    */
-  join: (separator: string) => (strList: string[]) => strList.join(separator),
+  join: (separator: Str) => (strList: List<Str>) => strList.join(separator),
 
   /**
    * Break a string into words, splitting on chunks of whitespace.
@@ -232,7 +413,7 @@ export const String = {
    * @example
    * words("How are \t you? \n Good?") === ["How", "are", "you?", "Good?"]
    */
-  words: (str: string) => str.split(/\s/g).filter(s => s.length > 0),
+  words: (str: Str) => str.split(/\s/g).filter(s => s.length > 0),
 
   /**
    * Break a string into lines, splitting on newlines.
@@ -240,7 +421,7 @@ export const String = {
    * @example
    * lines("How are you?\nGood?") === ["How are you?", "Good?"]
    */
-  lines: (str: string) => str.split(/\n/g),
+  lines: (str: Str) => str.split(/\n/g),
 
   /**
    * Take a substring given a start and end index.
@@ -252,7 +433,7 @@ export const String = {
    * slice(0)(-7)("snakes on a plane!") === "snakes on a"
    * slice(-6)(-1)("snakes on a plane!") === "plane"
    */
-  slice: (startIndex: number) => (endIndex: number) => (str: string) => str.slice(startIndex, endIndex),
+  slice: (startIndex: Num) => (endIndex: Num) => (str: Str) => str.slice(startIndex, endIndex),
 
   /**
    * Take /n/ characters from the left side of a string.
@@ -260,7 +441,7 @@ export const String = {
    * @example
    * left(2)("Mulder") === "Mu"
    */
-  left: (take: number) => (str: string) => str.slice(0, take),
+  left: (take: Num) => (str: Str) => str.slice(0, take),
 
   /**
    * Take /n/ characters from the right side of a string.
@@ -268,7 +449,7 @@ export const String = {
    * @example
    * right(2)("Scully") === "ly"
    */
-  right: (take: number) => (str: string) => str.slice(-take),
+  right: (take: Num) => (str: Str) => str.slice(-take),
 
   /**
    * Drop /n/ characters from the left side of a string.
@@ -276,7 +457,7 @@ export const String = {
    * @example
    * dropLeft(2)("The Lone Gunmen") === "e Lone Gunmen"
    */
-  dropLeft: (drop: number) => (str: string) => str.slice(drop),
+  dropLeft: (drop: Num) => (str: Str) => str.slice(drop),
 
   /**
    * Drop /n/ characters from the left side of a string.
@@ -284,65 +465,89 @@ export const String = {
    * @example
    * dropRight(2)("Cigarette Smoking Man") === "Cigarette Smoking M"
    */
-  dropRight: (drop: number) => (str: string) => str.slice(0, -drop),
+  dropRight: (drop: Num) => (str: Str) => str.slice(0, -drop),
 
-  pad: (thisMany: number) => (padding: string) => (str: string) => {
+  pad: (thisMany: Num) => (padding: Str) => (str: Str) => {
     const pad = padding.repeat(thisMany)
     return pad + str + pad
   },
 
-  padLeft: (thisMany: number) => (padding: string) => (str: string) => {
+  padLeft: (thisMany: Num) => (padding: Str) => (str: Str) => {
     const pad = padding.repeat(thisMany)
     return pad + str
   },
 
-  padRight: (thisMany: number) => (padding: string) => (str: string) => {
+  padRight: (thisMany: Num) => (padding: Str) => (str: Str) => {
     const pad = padding.repeat(thisMany)
     return str + pad
   },
 
-  isNumber: (str: string) =>
+  fromNumber: (num: Num) => num.toString(),
+
+  /** 
+   * regex test, based on https://www.regular-expressions.info/floatingpoint.html
+   * should match all numbers (even those w/ exponents)
+   */ 
+  isFloat: (str: Str) =>
     /^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/.test(str),
-    // /^-?\d+$/.test(str),
-    // Object.is(parseFloat(str), NaN)
-    //   ? false
-    //   : true,
 
-  fromNumber: (num: number) => num.toString(),
-
-  toNumber: (str: string): Maybe<number> => {
+  toFloat: (str: Str): Maybe<Num> => {
+    // b/c `parseFloat` will match strings
+    // we may not want to include
+    if (!Str.isFloat(str)) {
+      return Nothing
+    }
     const parsedFloat = parseFloat(str)
     return Object.is(parsedFloat, NaN)
       ? Nothing
       : Just(parsedFloat)
   },
 
-  toList: (str: string) => str.split(""),
+  /** 
+   * regex test, based on https://www.regular-expressions.info/floatingpoint.html
+   * should match all numbers (even those w/ exponents), except decimals 
+   */ 
+  isInt: (str: Str) =>
+    /^[-+]?[0-9]+([eE][+]?[0-9]+)?$/.test(str),
 
-  fromList: (strList: string[]) => strList.join(""),
+  toInt: (str: Str): Maybe<Num> => {
+    // b/c `parseInt` will match strings
+    // we may not want to include
+    if (!Str.isInt(str)) {
+      return Nothing
+    }
+    const parsedInt = parseInt(str)
+    return Object.is(parsedInt, NaN)
+      ? Nothing
+      : Just(parsedInt)
+  },
 
-  cons: (toPrepend: string) => (str: string) => toPrepend + str,
+  toList: (str: Str) => str.split(""),
 
-  uncons: (str: string): Maybe<Tuple<string, string>> =>
+  fromList: (strList: List<Str>) => strList.join(""),
+
+  cons: (toPrepend: Str) => (str: Str) => toPrepend + str,
+
+  uncons: (str: Str): Maybe<Tuple<Str, Str>> =>
     str.slice(0, 1) === ""
       ? Nothing
-      : Just(Tuple(str.slice(0, 1), str.slice(1, str.length))),
+      : Just([str.slice(0, 1), str.slice(1, str.length)]),
 
-  map: (tranformFunc: (char: string) => string) => (str: string) =>
+  map: (tranformFunc: (char: Str) => Str) => (str: Str) =>
     str.split("").map(tranformFunc).join(""),
 
-  filter: (testFunc: (char: string) => boolean) => (str: string) =>
+  filter: (testFunc: (char: Str) => boolean) => (str: Str) =>
     str.split("").filter(testFunc).join(""),
 
-  foldl: <T>(foldFn: (p1: string) => (p2: T) => T) => (accumulator: T) => (str: string): T => {
+  foldl: <T>(foldFn: (p1: Str) => (p2: T) => T) => (accumulator: T) => (str: Str): T => {
     const chars = str.split("")
-    for (let i of chars) {
+    for (const i of chars) {
       accumulator = foldFn(i)(accumulator)
     }
     return accumulator
   },
 
-  foldr: <T>(foldFn: (p1: string) => (p2: T) => T) => (accumulator: T) => (str: string): T => {
+  foldr: <T>(foldFn: (p1: Str) => (p2: T) => T) => (accumulator: T) => (str: Str): T => {
     const chars = str.split("")
     for (let i = chars.length - 1; i >= 0; --i) {
       accumulator = foldFn(chars[i])(accumulator)
@@ -350,7 +555,7 @@ export const String = {
     return accumulator
   },
 
-  any: (testFn: (char: string) => boolean) => (str: string): boolean =>
+  any: (testFn: (char: Str) => boolean) => (str: Str): boolean =>
     str.split("").some(testFn),
 
   /**
@@ -361,34 +566,36 @@ export const String = {
    * all(isDigit)("R2-D2") === True
    * all(isDigit)("heart") === True
    */
-  all: (testFn: (char: string) => boolean) => (str: string): boolean =>
+  all: (testFn: (char: Str) => boolean) => (str: Str): boolean =>
     str.split("").every(testFn)
 }
 
-export const Record = {
+export type Dict<K extends string | number | symbol, T> = Record<K, T>
+
+export const Dict = {
 
   empty: () => ({}),
 
-  member: <T>(key: string) => (record: Record<string, T>) =>
-    record[key] ? true : false,
+  member: <T>(key: Str) => (dict: Dict<Str, T>) =>
+    dict[key] ? true : false,
 
-  size: <T>(record: Record<string, T>) =>
-  Object.keys(record).length,
+  size: <T>(dict: Dict<Str, T>) =>
+  Object.keys(dict).length,
 
-  keys: <T>(record: Record<string, T>) =>
-    Object.keys(record).sort(),
+  keys: <T>(dict: Dict<Str, T>) =>
+    Object.keys(dict).sort(),
 
-  values: <T>(record: Record<string, T>) =>
-    Object.keys(record).sort().map(key => record[key]),
+  values: <T>(dict: Dict<Str, T>) =>
+    Object.keys(dict).sort().map(key => dict[key]),
 
-  fromList: <T>(list: Record<string, T>[]) =>
+  fromList: <T>(list: Dict<Str, T>[]) =>
     list
       .sort((a, b) => Object.keys(a)[0]
       .localeCompare(Object.keys(b)[0]))
       .reduce((acc, cur) => Object.assign(acc, { [Object.keys(cur)[0]]: Object.values(cur)[0] }), {}),
 
-  toList: <T>(record: Record<string, T>) =>
-    Object.keys(record).map(key => ({ [key]: record[key] })),
+  toList: <T>(dict: Dict<Str, T>) =>
+    Object.keys(dict).map(key => ({ [key]: dict[key] })),
 
   // Get the value associated with a key. If the key is not found, return
   // @Nothing@. This is useful when you are not sure if a key will be in the
@@ -399,51 +606,113 @@ export const Record = {
   // > Obj.get("Tom")(animals) == Just('Cat')
   // > Obj.get("Jerry")(animals) == Just('Mouse')
   // > Obj.get("Spike")(animals) == Nothing
-  get: <T>(key: string) => (record: Record<string, T>): Maybe<T> =>
-    record[key]
-      ? Just(record[key])
+  get: <T>(key: Str) => (dict: Dict<Str, T>): Maybe<T> =>
+    dict[key]
+      ? Just(dict[key])
       : Nothing,
 
-  insert: <T>(key: string) => (value: T) => (record: Record<string, T>): Record<string, T> =>
-    ({ ...record, [key]: value }),
+  insert: <T>(key: Str) => (value: T) => (dict: Dict<Str, T>): Dict<Str, T> =>
+    ({ ...dict, [key]: value }),
 
-  remove: <T>(key: string) => (record: Record<string, T>): Record<string, T> =>
-    Object.keys(record).reduce(
+  remove: <T>(key: Str) => (dict: Dict<Str, T>): Dict<Str, T> =>
+    Object.keys(dict).reduce(
       (acc, cur) => cur === key
         ? acc
-        : ({ ...acc, [cur]: record[cur] }),
+        : ({ ...acc, [cur]: dict[cur] }),
     {}),
 
   /**
-   * Attempts to update record value at @param key with @param alterFn
+   * Attempts to update dictionary value at @param key with @param alterFn
    * If it fails, nothing happens, otherwise the value is updated
    */
-  update: <T>(key: string) => (alterFn: (maybeValue: Maybe<T>) => Maybe<T>) => (record: Record<string, T>): Record<string, T> =>
-    Object.keys(record).reduce(
+  update: <T>(key: Str) => (alterFn: (maybeValue: Maybe<T>) => Maybe<T>) => (dict: Dict<Str, T>): Dict<Str, T> =>
+    Object.keys(dict).reduce(
       (acc, cur) => {
         if (cur === key) {
           // check result of alter function
-          const result = alterFn(Just(record[cur]))
+          const result = alterFn(Just(dict[cur]))
           return result.type === MaybeType.Nothing
-            ? { ...acc, [cur]: record[cur] }
+            ? { ...acc, [cur]: dict[cur] }
             : {
                 ...acc,
                 [cur]: result.value // must be T since we checked for `Nothing`
               }
         } else {
-          return { ...acc, [cur]: record[cur] }
+          return { ...acc, [cur]: dict[cur] }
         }
       },
     {}),
 }
 
+// List
+// 
+// ...
+
+export type List<T> = T[]
+
+export const List = {
+
+}
+
+/**
+ * Represents an ordered, unique set of values of the same type.  
+ * As well as Tuples and Lists of Sequences
+ */
+export type Seq<T> = T[]
+
+/**
+ * Represents an ordered, unique set of values of the same type.  
+ * As well as Tuples and Lists of Sequences
+ */
+export const Seq = {
+
+  empty: (): Seq<Ord> => [],
+
+  equals: <T>(a: Seq<Ord & T>) => (b: Seq<Ord & T>): boolean => {
+    if (!b) return false
+    if (a.length != b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] instanceof Array && b[i] instanceof Array) {
+        // deno-lint-ignore no-explicit-any
+        if(!Seq.equals(a[i] as any)(b[i] as any)) {
+          return false
+        }
+      }
+      else if (a[i] != b[i]) {
+        return false
+      }
+    }
+    return true
+  },
+
+  singleton: (a: Ord): Seq<Ord> => [a],
+
+  fromList: <T>(list: List<Ord & T>): Seq<Ord & T> =>
+    list.sort(Ord.compare).filter((value, index, sortedList) => {
+      if (value instanceof Array) {
+        // deno-lint-ignore no-explicit-any
+        return !Seq.equals(value)(sortedList[index - 1] as any)
+      }
+      else {
+        return value != sortedList[index - 1]
+      }
+    }),
+
+  insert: <T>(a: Ord & T) => (b: Seq<Ord & T>): Seq<Ord & T> =>
+    Seq.fromList([...b, a])
+
+}
+
 // tests
 
-const animals = Record.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
-const getTom = Record.get('Tom')(animals) // -> Just('Tom')
-const getValues = Record.values({1: 'cat', 2: 'dog'})
-const objUpdate = Record.update<string>('a_first')(x => Nothing)({ 'a': 'thing'})
-const objUpdate_1 = Record.update<string>('a_first')(Maybe.map(String.right(2)))(animals)
+// sets
+const s1 = Seq.insert(new Date())
+
+const animals = Dict.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
+const getTom = Dict.get('Tom')(animals) // -> Just('Tom')
+const getValues = Dict.values({1: 'cat', 2: 'dog'})
+const objUpdate = Dict.update<Str>('a_first')(() => Nothing)({ 'a': 'thing'})
+const objUpdate_1 = Dict.update<Str>('a_first')(Maybe.map(Str.right(2)))(animals)
 
 // ts doesn't know what the generic 'T' type should be for the alter function, so this won't compile
 // this would be similar to the Haskell or Elm compiler yelling at you to provide a type annotation
@@ -464,16 +733,16 @@ const objUpdate_1 = Record.update<string>('a_first')(Maybe.map(String.right(2)))
 
 // update function with pipe
 // kinda messy
-const objUpdate_6 = pipe(animals, Record.update<string>('Jerry')(Maybe.map(String.right(2))))
+const objUpdate_6 = pipe(animals, Dict.update<Str>('Jerry')(Maybe.map(Str.right(2))))
 
 // update function with pipe and accessor
 // a litte better
-const accessor = Record.update<string>('Jerry')
-const objUpdate_7 = pipe(animals, accessor(Maybe.map(String.right(2))))
+const accessor = Dict.update<Str>('Jerry')
+const objUpdate_7 = pipe(animals, accessor(Maybe.map(Str.right(2))))
 
 // update function with pipe and composed update
 // probably best
-const objUpdate_8 = pipe(String.right(2), Maybe.map, Record.update<string>('Jerry'))
+const objUpdate_8 = pipe(Str.right(2), Maybe.map, Dict.update<Str>('Jerry'))
 const updateResult = objUpdate_8(animals)
 
 const toValidMonth = (month: number) =>
@@ -482,14 +751,14 @@ const toValidMonth = (month: number) =>
     : Nothing
 
 // w/o using pipe
-const parseMonth = (userInput: string) =>
+const parseMonth = (userInput: Str) =>
   // String.toNumber(userInput).chain(toValidMonth)
   // Maybe.andThen(toValidMonth)(String.toNumber(userInput))
-  pipe(String.toNumber(userInput), Maybe.andThen(toValidMonth))
+  pipe(Str.toInt(userInput), Maybe.andThen(toValidMonth))
 
 // using pipe
-const parseMonth_p = (userInput: string) =>
-  pipe(userInput, String.toNumber, Maybe.andThen(toValidMonth))
+const parseMonth_p = (userInput: Str) =>
+  pipe(userInput, Str.toInt, Maybe.andThen(toValidMonth))
 
 // 3
 const fromMaybeMapTest_1 = Maybe.map(Math.sqrt)(Just(9))
