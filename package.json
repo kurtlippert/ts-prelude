@@ -6,12 +6,5 @@
     "test": "deno run index.spec.ts"
   },
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "typescript": "^4.5.4"
-  },
-  "dependencies": {
-    "@types/node": "^17.0.1",
-    "@types/tape": "^4.13.2"
-  }
+  "license": "ISC"
 }
