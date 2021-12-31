@@ -5,25 +5,16 @@
 // as it is. Use of `any` is to get around JS-related limitations.
 // But in practice (and for use in apps), we would want to keep this rule
 
-import { pipe } from "https://deno.land/x/fp_ts/function.ts"
-
 /**
- * Overload of built-in `boolean` type.
- * Why? In case we ever want to overload the built-in `boolean` type
- * Buuut... mainly for fun. This `Bool` type matches more w/ Elm
- * (which was half the point anyway)
+ * Replacement of the built-in `boolean` type.
  */
 export type Bool = boolean
 
-/**
- * Overload of built-in `boolean` type.
- * Add pipe-able `Bool` functions w/o naming clash
- */
 export const Bool = {
-  or: (left: Bool) => (right: Bool) => left || right,
-  and: (left: Bool) => (right: Bool) => left && right,
-  not: (cond: Bool) => !cond,
-  xor: (left: Bool) => (right: Bool) =>
+  or: (left: Bool) => (right: Bool): Bool => left || right,
+  and: (left: Bool) => (right: Bool): Bool => left && right,
+  not: (cond: Bool): Bool => !cond,
+  xor: (left: Bool) => (right: Bool): Bool =>
     ((left as any)^(right as any)) === 1
 }
 
@@ -32,18 +23,14 @@ export const Bool = {
  * Anything that can be sorted
  */
 export type Ord
-  = string
-  | number
+  = Str
+  | Num
   | Date
   | [Ord, Ord]
   | Ord[]
 
-/**
- * Order-able.
- * Anything that can be sorted
- */
 export const Ord = {
-  compare: <T>(a: Ord & T, b: Ord & T): number => {
+  compare: <T>(a: Ord & T, b: Ord & T): Num => {
     // Shouldn't be necessary to check a _and_ b.
     // If the type system is doing it's job they need to be the same type
     // But helpful for the reader maybe?
@@ -57,7 +44,6 @@ export const Ord = {
     else if (a instanceof Date && b instanceof Date) {
       // typescript doesn't know how to deal with date math
       // so we have to cast to `any`
-      // deno-lint-ignore no-explicit-any
       return (a as any) - (b as any)
     }
 
@@ -94,12 +80,10 @@ export const Ord = {
       }
       else if (a[0] instanceof Date && b[0] instanceof Date) {
         // check length if first elements are the same, longer arrays sort last
-        // deno-lint-ignore no-explicit-any
         if ((a[0] as any) - (b[0] as any) === 0) {
           return a.length - b.length
         }
         else {
-          // deno-lint-ignore no-explicit-any
           return (a[0] as any) - (b[0] as any)
         }
       }
@@ -109,15 +93,10 @@ export const Ord = {
 }
 
 /**
- * inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Tuple.hs
  */
 export type Tuple<T, U> = [T, U]
 
-/**
- * inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Tuple.hs
- */
 export const Tuple = {
-
   /**
    * Create a 2-tuple.
    * 
@@ -152,17 +131,10 @@ export const Tuple = {
 }
 
 /**
- * There is a built-in `Math` module, but we're missing partial application
- * and pipe-able math operators.
  * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Basics.hs
  */
 export type Num = number
 
-/**
- * There is a built-in `Math` module, but we're missing partial application
- * and pipe-able math operators.
- * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Basics.hs
- */
 export const Num = {
   add: (value1: Num) => (value2: Num) => value1 + value2,
 }
@@ -178,7 +150,7 @@ export enum MaybeType {
 }
 
 /**
- * Holds some value (a value in a box!)
+ * Holds some value
  */
 export interface Just<T> {
   type: typeof MaybeType.Just
@@ -194,34 +166,22 @@ export interface Nothing {
 
 /**
  * May contain a value.
- * Useful replacement for uncertainty in TypeScript.
+ * Useful replacement for uncertainty in TypeScript. 
  */
 export type Maybe<T>
   = Just<T>
   | Nothing
 
-/**
- * `Nothing` constructor. Creates a `Nothing`
- */
+
 export const Nothing: Nothing = {
   type: MaybeType.Nothing
 }
 
-/**
- * `Just` constructor. 'Boxes' a value
- * 
- * @param value the value to 'box'
- * @returns 'boxed' value
- */
 export const Just = <T>(value: T): Just<T> => ({
   type: MaybeType.Just,
   value,
 })
 
-/**
- * May contain a value.
- * Useful replacement for uncertainty in TypeScript.
- */
 export const Maybe = {
 
   withDefault: <T>(_default: T) => (m1: Maybe<T>): T =>
@@ -231,6 +191,7 @@ export const Maybe = {
 
   map: <T, U>(fn: (p1: T) => U) => (m1: Maybe<T>): Maybe<U> => {
     const result = m1.type === MaybeType.Just ? m1.value : undefined
+    // TODO: remove the boolean cast. Replace w/ explicity comparison
     // deno-lint-ignore no-extra-boolean-cast
     if (!!result) {
       const newResult = result as T
@@ -243,6 +204,7 @@ export const Maybe = {
   map2: <T, U, V>(fn: (p1: T) => (p2: U) => V) => (m1: Maybe<T>) => (m2: Maybe<U>): Maybe<V> => {
     const result1 = m1.type === MaybeType.Just ? m1.value : undefined
     const result2 = m2.type === MaybeType.Just ? m2.value : undefined
+    // TODO: remove the boolean cast. Replace w/ explicity comparison
     if (!!result1 && !!result2) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
@@ -257,6 +219,7 @@ export const Maybe = {
     const result1 = m1.type === MaybeType.Just ? m1.value : undefined
     const result2 = m2.type === MaybeType.Just ? m2.value : undefined
     const result3 = m3.type === MaybeType.Just ? m3.value : undefined
+    // TODO: remove the boolean cast. Replace w/ explicity comparison
     if (!!result1 && !!result2 && !!result3) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
@@ -273,6 +236,7 @@ export const Maybe = {
     const result2 = m2.type === MaybeType.Just ? m2.value : undefined
     const result3 = m3.type === MaybeType.Just ? m3.value : undefined
     const result4 = m4.type === MaybeType.Just ? m4.value : undefined
+    // TODO: remove the boolean cast. Replace w/ explicity comparison
     if (!!result1 && !!result2 && !!result3 && !!result4) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
@@ -291,6 +255,7 @@ export const Maybe = {
     const result3 = m3.type === MaybeType.Just ? m3.value : undefined
     const result4 = m4.type === MaybeType.Just ? m4.value : undefined
     const result5 = m5.type === MaybeType.Just ? m5.value : undefined
+    // TODO: remove the boolean cast. Replace w/ explicity comparison
     if (!!result1 && !!result2 && !!result3 && !!result4 && !!result5) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
@@ -311,19 +276,11 @@ export const Maybe = {
 }
 
 /**
- * `Str` overloads built-in `string`, but this way we can add what we want 
- * w/o worrying about a clash between the two.
- * 
+ * Replacement for the build-in 'string' primitive
  * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Text.hs
  */
 export type Str = string
 
-/**
- * `Str` overloads built-in `string`, but this way we can add what we want 
- * w/o worrying about a clash between the two.
- * 
- * Inspired by: https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Text.hs
- */
 export const Str = {
 
   /**
@@ -656,14 +613,10 @@ export const List = {
 
 /**
  * Represents an ordered, unique set of values of the same type.  
- * As well as Tuples and Lists of Sequences
+ * Elements can also be Tuples or Lists of Sequences
  */
 export type Seq<T> = T[]
 
-/**
- * Represents an ordered, unique set of values of the same type.  
- * As well as Tuples and Lists of Sequences
- */
 export const Seq = {
 
   empty: (): Seq<Ord> => [],
@@ -673,12 +626,11 @@ export const Seq = {
     if (a.length != b.length) return false
     for (let i = 0; i < a.length; i++) {
       if (a[i] instanceof Array && b[i] instanceof Array) {
-        // deno-lint-ignore no-explicit-any
         if(!Seq.equals(a[i] as any)(b[i] as any)) {
           return false
         }
       }
-      else if (a[i] != b[i]) {
+      else if (Ord.compare(a[i], b[i]) !== 0) {
         return false
       }
     }
@@ -690,7 +642,6 @@ export const Seq = {
   fromList: <T>(list: List<Ord & T>): Seq<Ord & T> =>
     list.sort(Ord.compare).filter((value, index, sortedList) => {
       if (value instanceof Array) {
-        // deno-lint-ignore no-explicit-any
         return !Seq.equals(value)(sortedList[index - 1] as any)
       }
       else {
@@ -733,17 +684,17 @@ const objUpdate_1 = Dict.update<Str>('a_first')(Maybe.map(Str.right(2)))(animals
 
 // update function with pipe
 // kinda messy
-const objUpdate_6 = pipe(animals, Dict.update<Str>('Jerry')(Maybe.map(Str.right(2))))
+// const objUpdate_6 = pipe(animals, Dict.update<Str>('Jerry')(Maybe.map(Str.right(2))))
 
 // update function with pipe and accessor
 // a litte better
 const accessor = Dict.update<Str>('Jerry')
-const objUpdate_7 = pipe(animals, accessor(Maybe.map(Str.right(2))))
+// const objUpdate_7 = pipe(animals, accessor(Maybe.map(Str.right(2))))
 
 // update function with pipe and composed update
 // probably best
-const objUpdate_8 = pipe(Str.right(2), Maybe.map, Dict.update<Str>('Jerry'))
-const updateResult = objUpdate_8(animals)
+// const objUpdate_8 = pipe(Str.right(2), Maybe.map, Dict.update<Str>('Jerry'))
+// const updateResult = objUpdate_8(animals)
 
 const toValidMonth = (month: number) =>
   1 <= month && month <= 12
@@ -751,18 +702,18 @@ const toValidMonth = (month: number) =>
     : Nothing
 
 // w/o using pipe
-const parseMonth = (userInput: Str) =>
+// const parseMonth = (userInput: Str) =>
   // String.toNumber(userInput).chain(toValidMonth)
   // Maybe.andThen(toValidMonth)(String.toNumber(userInput))
-  pipe(Str.toInt(userInput), Maybe.andThen(toValidMonth))
+  // pipe(Str.toInt(userInput), Maybe.andThen(toValidMonth))
 
 // using pipe
-const parseMonth_p = (userInput: Str) =>
-  pipe(userInput, Str.toInt, Maybe.andThen(toValidMonth))
+// const parseMonth_p = (userInput: Str) =>
+//   pipe(userInput, Str.toInt, Maybe.andThen(toValidMonth))
 
 // 3
 const fromMaybeMapTest_1 = Maybe.map(Math.sqrt)(Just(9))
-const fromMaybeMapTest_1p = pipe(Just(9), Maybe.map(Math.sqrt))
+// const fromMaybeMapTest_1p = pipe(Just(9), Maybe.map(Math.sqrt))
 
 // this one reads better but its generally more flexible to use `pipe`
 // const fromMaybeMapTest_1a = Just(9).map(Math.sqrt)
