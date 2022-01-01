@@ -1,46 +1,14 @@
 import { assertEquals, assert } from "https://deno.land/std@0.119.0/testing/asserts.ts";
 
-import { pipe } from './pipe.ts'
-import { flow } from './flow.ts'
+import { pipe } from '../src/utils/pipe.ts'
+import { flow } from '../src/utils/flow.ts'
 
-import { Seq, List, Num, Str, Dict, Maybe, Ord, Bool } from './index.ts'
+import { Seq } from '../src/Seq.ts'
+import { List } from '../src/List.ts'
+import { Num } from '../src/Num.ts'
+import { Bool } from '../src/Bool.ts'
 
-Deno.test("'pipe' function", () => {
-  const len = (s: Str): Num => s.length
-  const double = (n: Num): Num => n * 2
-  assertEquals(
-    pipe(3),
-    3
-  )
-  assertEquals(
-    pipe('aaa', len, double),
-    6
-  )
-
-  // produces type error
-  // pipe(len, double)
-  // pipe('aaa', 'b')
-})
-
-Deno.test("'flow' function", () => {
-  const len = (s: Str): Num => s.length
-  const double = (n: Num): Num => n * 2
-  const doubleLen = flow(len, double)
-  assertEquals(
-    doubleLen('aaa'),
-    6
-  )
-  assertEquals(
-    flow(len)('aaa'),
-    3
-  )
-
-  // produces type errors
-  // flow(len, double(2))
-  // flow('aaa', len)
-})
-
-Deno.test("'Set' module functions", () => {
+Deno.test("'Seq' module functions", () => {
   assertEquals(
     Seq.fromList([[1],[1],[2,1],[],[3],[]]),
     [[],[1],[2,1],[3]]

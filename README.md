@@ -1,3 +1,27 @@
+# ts-prelude
+Shameless port of [NoRedInk's haskell custom prelude](https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude)
+(which is itself a port of Elm's standard lib).  
+
+Standard libraries aren't really a thing in Javascript.
+Pretty much what you get globally is what you get.
+There isn't any swapping out of `Set` or `Date` objects if you
+want to use your own. Javascript (and by extension typescript),
+doesn't always support robust default functions (for example,
+`string.parseFloat` will parse `33s` as `33`).  
+
+Enter `ts-prelude`, which seeks to provide the TypeScript developer
+(what is effectively) a series of helper / utility functions to solve
+common problems in code (hence why these functions and classes
+would already be a part of any language's standard lib).  
+
+## Notes on utility libs (lodash, rambda, etc.)
+The TypeScript support for these libs have problems:
+
+* Uncertainty through union types like `string | undefined | null`
+* FP functions (`pipe`, `flow`, `compose`, etc.) don't have great
+  typings (errors that should be caught by the compiler are not)
+
+
 ## Notes on currying
 Why are there none? After all, there are currying implementations we could use.  
 
@@ -7,7 +31,6 @@ Until then, we lose some of the typing benefit.
 `// add examples...`
 
 ## Notes on Type and Primitive Replacements
-
 We've added the following (redundant) types:
 * `Str`
 * `Num`
@@ -18,16 +41,22 @@ We've added the following (redundant) types:
 All of which are represented in TypeScript / JavaScript in some form.
 A few things here:  
 
-1. Wanted types to be Capital Case (start w/ a capital letter)
-2. Wanted there to be a module associated with the type
-3. Wanted ability to redefine these types (add constraints etc.)
-4. Potentially aid in type signature readibility
+* Wanted types to be Capital Case (start w/ a capital letter)
+* Wanted there to be a module associated with the type
+* Wanted ability to redefine these types (add constraints etc.)
+* Potentially aid in type signature readibility
 
 Downsides are:  
 
 1. Typescript will report the type as their base primitives
    unless one of the `ts-prelude` functions are called.
-2. Having this mix b/t custom vs primitive types can be confusing.
+2. Having this mix b/t custom vs primitive types can be confusing / 
+   annoying.
+
+## Notes on various `no-explicity-any` disables throughout the code
+This is b/c we're stretching the TypeScript type system in these files
+as it is. Use of `any` is to get around JS-related limitations.
+But in practice (and for use in apps), we would want to keep this rule.
 
 ### Maybe Type
 
