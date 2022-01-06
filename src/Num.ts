@@ -1,5 +1,6 @@
 export type Num = number
 
 export const Num = {
-  add: (value1: Num) => (value2: Num) => value1 + value2,
+  add: (a: Num) => (b: Num) => a + b,
+  sqrt: (a: Num): Num => Math.sqrt(a)
 }

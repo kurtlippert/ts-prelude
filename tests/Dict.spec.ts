@@ -1,3 +1,29 @@
+import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts"
+
+import { Dict } from "../src/Dict.ts"
+import { Ord } from "../src/Ord.ts"
+ 
+Deno.test("'Dict' 'fromList' tests", () => {
+  assertEquals(
+    Dict.fromList([{ "Tom": "Cat" }, { "Jerry": "Mouse" }]),
+    { "Tom": "Cat", "Jerry": "Mouse"}
+  )
+
+  assertEquals(
+    Dict.fromList([
+      { "first": 1, "second": {"2": 2} },
+      { "third": 3, "fourth": [1,2,3], "fifth": "5" }
+    ]),
+    {
+      "first": 1,
+      "second": {"2": 2},
+      "third": 3,
+      "fourth": [1,2,3],
+      "fifth": "5"
+    }
+  )
+})
+
 // const animals = Dict.fromList([{ 'Tom': 'Cat' }, { 'Jerry': 'Mouse' }])
 // const getTom = Dict.get('Tom')(animals) // -> Just('Tom')
 // const getValues = Dict.values({1: 'cat', 2: 'dog'})

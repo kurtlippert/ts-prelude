@@ -1,7 +1,6 @@
-import { assertEquals, assert } from "https://deno.land/std@0.119.0/testing/asserts.ts";
+import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts";
 
 import { pipe } from '../src/utils/pipe.ts'
-import { flow } from '../src/utils/flow.ts'
 
 import { Seq } from '../src/Seq.ts'
 import { List } from '../src/List.ts'

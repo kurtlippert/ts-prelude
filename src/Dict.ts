@@ -19,7 +19,7 @@ export const Dict = {
   values: <T>(dict: Dict<Str, T>) =>
     Object.keys(dict).sort().map(key => dict[key]),
 
-  fromList: <T>(list: Dict<Str, T>[]) =>
+  fromList: <T>(list: Dict<Str, unknown>[]) =>
     list
       .sort((a, b) => Object.keys(a)[0]
       .localeCompare(Object.keys(b)[0]))
