@@ -1,16 +1,20 @@
 import { Str } from './Str.ts' 
 import { Num } from './Num.ts'
+import { List } from './List.ts'
+
+export type OrdBaseType
+  = Str
+  | Num
+  | Date
 
 /**
  * Order-able.
  * Anything that can be sorted
  */
 export type Ord
-  = Str
-  | Num
-  | Date
-  | [Ord, Ord]
-  | Ord[]
+  = OrdBaseType 
+  | [OrdBaseType, OrdBaseType]
+  | OrdBaseType[]
 
 export const Ord = {
   compare: <T>(a: Ord & T, b: Ord & T): Num => {
@@ -75,5 +79,5 @@ export const Ord = {
       }
     }
     return 0
-  },
+  }
 }

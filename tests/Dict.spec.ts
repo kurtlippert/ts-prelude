@@ -1,6 +1,7 @@
 import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts"
 
 import { Dict } from "../src/Dict.ts"
+import { Num } from "../src/Num.ts"
 import { Ord } from "../src/Ord.ts"
  
 Deno.test("'Dict' 'fromList' tests", () => {
@@ -11,15 +12,15 @@ Deno.test("'Dict' 'fromList' tests", () => {
 
   assertEquals(
     Dict.fromList([
-      { "first": 1, "second": {"2": 2} },
-      { "third": 3, "fourth": [1,2,3], "fifth": "5" }
+      { "first": 1, "second": 2 },
+      { "third": 3, "fourth": 4, "fifth": 5 }
     ]),
     {
       "first": 1,
-      "second": {"2": 2},
+      "second": 2,
       "third": 3,
-      "fourth": [1,2,3],
-      "fifth": "5"
+      "fourth": 4,
+      "fifth": 5
     }
   )
 })

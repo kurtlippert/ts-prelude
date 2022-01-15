@@ -62,7 +62,7 @@ export const Str = {
    * @example
    * concat(["never", "the", "less"]) === "nevertheless"
    */
-  concat: (strList: List<Str>) => strList.join(""),
+  concat: (strList: List<Str>): Str => strList.join(""),
 
   /**
    * Split a string using a given separator.
@@ -73,7 +73,7 @@ export const Str = {
    * const splitComma = split(",")
    * splitComma("cat,dog,cow") === ["cat", "dog", "cow"]
    */
-  split: (separator: Str) => (str: Str) => str.split(separator),
+  split: (separator: Str) => (str: Str): List<Str> => str.split(separator),
 
   /**
    * Put many strings together with a given separator
@@ -86,7 +86,7 @@ export const Str = {
    * const joinSlash = join("/")
    * joinSlash(["home", "kurt", "Desktop"]) === "home/kurt/Desktop"
    */
-  join: (separator: Str) => (strList: List<Str>) => strList.join(separator),
+  join: (separator: Str) => (strList: List<Str>): Str => strList.join(separator),
 
   /**
    * Break a string into words, splitting on chunks of whitespace.

@@ -43,6 +43,9 @@ export const Maybe = {
       ? m1.value
       : _default,
 
+  isNothing: <T>(a: Maybe<T>) =>
+    a.type === MaybeType.Nothing,
+
   map: <T, U>(fn: (p1: T) => U) => (m1: Maybe<T>): Maybe<U> => {
     const result = m1.type === MaybeType.Just ? m1.value : undefined
     // TODO: remove the boolean cast. Replace w/ explicity comparison
