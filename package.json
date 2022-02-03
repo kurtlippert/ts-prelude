@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "deno run index.spec.ts"
+    "test": "deno test"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "publishConfig": {
+    "@kurtlippert:registry": "https://npm.pkg.github.com"
+  }
 }

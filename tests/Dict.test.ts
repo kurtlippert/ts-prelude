@@ -2,7 +2,7 @@ import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts"
 
 import { Dict } from "../src/Dict.ts"
 import { Num } from "../src/Num.ts"
-import { Ord } from "../src/Ord.ts"
+import { Maybe } from '../src/Maybe.ts'
  
 Deno.test("'Dict' 'fromList' tests", () => {
   assertEquals(
@@ -10,18 +10,44 @@ Deno.test("'Dict' 'fromList' tests", () => {
     { "Tom": "Cat", "Jerry": "Mouse"}
   )
 
+  // assertEquals(
+  //   Dict.fromList([
+  //     { "first": 1, "second": 2 },
+  //     { "third": 3, "fourth": 4, "fifth": 5 }
+  //   ]),
+  //   {
+  //     "first": 1,
+  //     "second": 2,
+  //     "third": 3,
+  //     "fourth": 4,
+  //     "fifth": 5
+  //   }
+  // )
+})
+
+Deno.test("'Dict' update tests", () => {
+  const input: Dict<Num> = {
+    'a': 1,
+    'b': 2,
+    'c': 3
+  }
+  const output: Dict<Num> = {
+    'a': 3,
+    'b': 2,
+    'c': 3
+  }
   assertEquals(
-    Dict.fromList([
-      { "first": 1, "second": 2 },
-      { "third": 3, "fourth": 4, "fifth": 5 }
-    ]),
-    {
-      "first": 1,
-      "second": 2,
-      "third": 3,
-      "fourth": 4,
-      "fifth": 5
-    }
+    // compile error
+    // Dict.update('a')(Maybe.map(Num.add(2)))(input),
+
+    // need to specify the type variable
+    Dict.update<Num>('a')(Maybe.map(Num.add(2)))(input),
+    output
+  )
+
+  assert(
+      Dict.update<Num>('b')(Maybe.map(Num.sub(9)))(input) !==
+      output
   )
 })
 

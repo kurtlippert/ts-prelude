@@ -68,4 +68,19 @@ export const Arr = {
     return acc
   },
 
+  filter: <A>(fn: (_: A) => Bool) => (arr: Arr<A>): Arr<A> =>
+    arr.filter(fn),
+
+  map: <A, B>(fn: (_: A) => B) => (arr: Arr<A>): Arr<B> =>
+    arr.map(fn),
+
+  indexedMap: <A, B>(fn: (_: Num) => (_: A) => B) => (arr: Arr<A>): Arr<B> =>
+    arr.map((value: A, index: Num) => fn(index)(value)),
+
+  append: <A>(arrleft: Arr<A>) => (arrRight: Arr<A>): Arr<A> =>
+    [...arrleft, ...arrRight],
+
+  slice: <A>(start: Num) => (end: Num) => (arr: Arr<A>): Arr<A> =>
+    arr.slice(start, end)
+
 }

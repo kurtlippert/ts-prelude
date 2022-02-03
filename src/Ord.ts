@@ -1,6 +1,5 @@
 import { Str } from './Str.ts' 
 import { Num } from './Num.ts'
-import { List } from './List.ts'
 
 export type OrdBaseType
   = Str
