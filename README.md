@@ -3,7 +3,9 @@ Shameless port of [NoRedInk's haskell custom prelude](https://github.com/NoRedIn
 (which is itself a port of Elm's standard lib).  
 
 ### The problem with TS's `filter`  
-![image](https://user-images.githubusercontent.com/5053769/180013214-88cf005f-385c-4692-ba6b-87c8e77acf8b.png)
+![image](https://user-images.githubusercontent.com/5053769/180013214-88cf005f-385c-4692-ba6b-87c8e77acf8b.png)  
+
+One of the goals of this project is to help TS out during these times of uncertainty
 
 ## Why write this?
 Standard libraries aren't really a thing in Javascript.
