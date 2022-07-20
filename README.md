@@ -2,6 +2,10 @@
 Shameless port of [NoRedInk's haskell custom prelude](https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude)
 (which is itself a port of Elm's standard lib).  
 
+## The problem with TS's `filter`  
+![image](https://user-images.githubusercontent.com/5053769/180013214-88cf005f-385c-4692-ba6b-87c8e77acf8b.png)
+
+## Why write this?
 Standard libraries aren't really a thing in Javascript.
 Pretty much what you get globally is what you get.
 There isn't any swapping out of `Set` or `Date` objects if you
