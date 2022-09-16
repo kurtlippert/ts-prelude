@@ -40,16 +40,19 @@ export const Dict = {
   toList: <T>(dict: Dict<T>) =>
     Object.keys(dict).map(key => ({ [key]: dict[key] })),
 
-  // Get the value associated with a key. If the key is not found, return
-  // @Nothing@. This is useful when you are not sure if a key will be in the
-  // dictionary.
-  //
-  // > const animals = Dict.fromList([ ['Tom', 'Cat'], ['Jerry', 'Mouse'] ])
-  // >
-  // > Dict.get("Tom")(animals) == Just('Cat')
-  // > Dict.get("Jerry")(animals) == Just('Mouse')
-  // > Dict.get("Spike")(animals) == Nothing
-  get: <T>(key: Str) => (dict: Dict<T>): Maybe<T> => {
+  /**
+   * Get the value associated with a key. If the key is not found, return
+   * @Nothing@. This is useful when you are not sure if a key will be in the
+   * dictionary.
+   *
+   * @example
+   * > const animals = Dict.fromList([ ['Tom', 'Cat'], ['Jerry', 'Mouse'] ])
+   * >
+   * > Dict.get("Tom")(animals) == Just('Cat')
+   * > Dict.get("Jerry")(animals) == Just('Mouse')
+   * > Dict.get("Spike")(animals) == Nothing
+   */
+  get: (key: Str) => <T>(dict: Dict<T>): Maybe<T> => {
     if (dict[key]) {
       // typescript unable to (infer?) `dict[key]` is not `undefined`
       // for some reason. Hence the `T` cast here

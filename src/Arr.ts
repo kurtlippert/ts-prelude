@@ -4,13 +4,46 @@ import { Maybe, Just, Nothing } from './Maybe.ts'
 
 export type Arr<T> = T[]
 
+/**
+ * Array-related operations. Generally you can use `List`
+ */
 export const Arr = {
+  /**
+   * Returns an empty JS array
+   * 
+   * Should this be a function?
+   * 
+   * @example
+   * Arr.empty() === []
+   */
   empty: (): Arr<unknown> => [],
 
+  /**
+   * Determines if an array is empty 
+   * 
+   * @example
+   * Arr.isEmpty(Arr.empty()) === true
+   */
   isEmpty: <T>(arr: Arr<T>): Bool => arr.length === 0,
 
+  /**
+   * Return the length of an array
+   * 
+   * @example
+   * Arr.length([1, 2, 3]) === 3
+   */
   length: <T>(arr: Arr<T>): number => arr.length,
 
+  /**
+   * 
+   * Initialize an array. @initialize n f@ creates an array of length @n@ with
+   * the element at index @i@ initialized to the result of @(f i)@.
+   * 
+   * @example
+   * Arr.initialize(4)(i => i + 1) === [0,1,2,3]
+   * Arr.initialize(4)(i => i * i) === [0,1,4,9]
+   * Arr.initialize(4)(always 0)  == fromList [0,0,0,0] 
+   */
   initialize: <T>(length: Num) => (fn: (a: Num) => T): Arr<T> => {
     const newArr: Arr<T> = []
     for (let i = 0; i < length; i++) {

@@ -10,14 +10,12 @@
  * We can add more as needed ¯\_(ツ)_/¯
  *
  * @example
- * import { flow } from 'fp-ts/function'
- *
  * const len = (s: string): number => s.length
  * const double = (n: number): number => n * 2
  *
  * const f = flow(len, double)
  *
- * assert.strictEqual(f('aaa'), 6)
+ * f('aaa') === 6
  */
 export function flow<A extends ReadonlyArray<unknown>, B>(ab: (...a: A) => B): (...a: A) => B
 export function flow<A extends ReadonlyArray<unknown>, B, C>(ab: (...a: A) => B, bc: (b: B) => C): (...a: A) => C
