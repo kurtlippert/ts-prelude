@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 
-import { Str } from '../../src/Str.ts'
-import { Num } from '../../src/Num.ts'
+import { Str } from '../../Str.ts'
+import { Num } from '../../Num.ts'
 
-import { flow } from '../../src/utils/flow.ts'
+import { flow } from '../../utils/flow.ts'
 
 Deno.test("'flow' function", () => {
   const len = (s: Str): Num => s.length

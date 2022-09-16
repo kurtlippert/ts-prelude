@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 
-import { Str } from '../../src/Str.ts'
-import { Num } from '../../src/Num.ts'
+import { Str } from '../../Str.ts'
+import { Num } from '../../Num.ts'
 
-import { pipe } from '../../src/utils/pipe.ts'
+import { pipe } from '../../utils/pipe.ts'
 
 Deno.test("'pipe' function", () => {
   const len = (s: Str): Num => s.length

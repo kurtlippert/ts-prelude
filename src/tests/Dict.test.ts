@@ -1,8 +1,8 @@
-import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts"
+import { assertEquals, assert } from "https://deno.land/std@0.156.0/testing/asserts.ts"
 
-import { Dict } from "../src/Dict.ts"
-import { Num } from "../src/Num.ts"
-import { Maybe } from '../src/Maybe.ts'
+import { Dict } from "../Dict.ts"
+import { Num } from "../Num.ts"
+import { Maybe } from '../Maybe.ts'
  
 Deno.test("'Dict' 'fromList' tests", () => {
   assertEquals(

@@ -1,10 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 
-import { Str } from '../../src/Str.ts'
-import { Num } from '../../src/Num.ts'
+import { Str } from '../../Str.ts'
+import { Num } from '../../Num.ts'
 
-import { apply as ap } from "../../src/utils/apply.ts";
-import { Just, Maybe } from "../../src/Maybe.ts";
+import { apply as ap } from "../../utils/apply.ts";
+import { Just, Maybe } from "../../Maybe.ts";
 
 Deno.test("'apply' function", () => {
   const add = (a: number) => (b: number): Num => a + b

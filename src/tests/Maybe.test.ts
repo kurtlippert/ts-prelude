@@ -1,11 +1,11 @@
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 
-import { Dict } from "../src/Dict.ts"
-import { Num } from "../src/Num.ts"
-import { Just, Maybe, Nothing } from '../src/Maybe.ts'
-import { Str } from "../src/Str.ts";
-import { pipe } from "../src/utils/pipe.ts";
-import { List } from "../src/List.ts";
+import { Dict } from "../Dict.ts"
+import { Num } from "../Num.ts"
+import { Just, Maybe, Nothing } from '../Maybe.ts'
+import { Str } from "../Str.ts";
+import { pipe } from "../utils/pipe.ts";
+import { List } from "../List.ts";
  
 Deno.test("Maybe.withDefault", () => {
   assertEquals(

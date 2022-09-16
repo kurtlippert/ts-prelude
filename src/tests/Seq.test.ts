@@ -1,11 +1,11 @@
-import { assertEquals, assert } from "https://deno.land/std/testing/asserts.ts";
+import { assertEquals, assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 
-import { pipe } from '../src/utils/pipe.ts'
+import { pipe } from '../utils/pipe.ts'
 
-import { Seq } from '../src/Seq.ts'
-import { List } from '../src/List.ts'
-import { Num } from '../src/Num.ts'
-import { Bool } from '../src/Bool.ts'
+import { Seq } from '../Seq.ts'
+import { List } from '../List.ts'
+import { Num } from '../Num.ts'
+import { Bool } from '../Bool.ts'
 
 Deno.test("'Seq' module functions", () => {
   assertEquals(
