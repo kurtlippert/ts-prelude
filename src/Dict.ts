@@ -12,6 +12,8 @@ import { Maybe, Just, Nothing, MaybeType } from './Maybe.ts'
  */
 export type Dict<T> = { [P in Str]?: T}
 
+export const d = <T>(a: Dict<T>) => a
+
 export const Dict = {
 
   empty: () => ({}),

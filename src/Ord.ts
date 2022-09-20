@@ -16,7 +16,7 @@ export type Ord
   | OrdBaseType[]
 
 export const Ord = {
-  compare: <T>(a: Ord & T, b: Ord & T): Num => {
+  compare: <T extends Ord>(a: T, b: T): Num => {
     // Shouldn't be necessary to check a _and_ b.
     // If the type system is doing it's job they need to be the same type
     // But helpful for the reader maybe?

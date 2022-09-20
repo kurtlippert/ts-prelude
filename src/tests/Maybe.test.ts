@@ -5,7 +5,6 @@ import { Num } from "../Num.ts"
 import { Just, Maybe, Nothing } from '../Maybe.ts'
 import { Str } from "../Str.ts";
 import { pipe } from "../utils/pipe.ts";
-import { List } from "../List.ts";
  
 Deno.test("Maybe.withDefault", () => {
   assertEquals(

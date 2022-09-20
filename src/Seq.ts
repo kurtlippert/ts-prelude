@@ -11,7 +11,7 @@ export const Seq = {
 
   empty: (): Seq<Ord> => [],
 
-  equals: <T>(a: Seq<Ord & T>) => (b: Seq<Ord & T>): boolean => {
+  equals: <T extends Ord>(a: Seq<T>) => (b: Seq<T>): boolean => {
     if (!b) return false
     if (a.length != b.length) return false
     for (let i = 0; i < a.length; i++) {
@@ -30,7 +30,7 @@ export const Seq = {
 
   singleton: (a: Ord): Seq<Ord> => [a],
 
-  fromList: <T>(list: List<Ord & T>): Seq<Ord & T> =>
+  fromList: <T extends Ord>(list: List<T>): Seq<T> =>
     list.sort(Ord.compare).filter((value: unknown, index: number, sortedList: unknown[]) => {
       if (value instanceof Array) {
         // deno-lint-ignore no-explicit-any
@@ -41,7 +41,6 @@ export const Seq = {
       }
     }),
 
-  insert: <T>(a: Ord & T) => (b: Seq<Ord & T>): Seq<Ord & T> =>
+  insert: <T extends Ord>(a: T) => (b: Seq<T>): Seq<T> =>
     Seq.fromList([...b, a])
-
 }

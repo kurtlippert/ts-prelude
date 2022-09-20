@@ -1,6 +1,8 @@
+import { Base } from "./types/Base.ts";
+
 /**
  */
-export type Tuple<T, U> = [T, U]
+export type Tuple<T extends Base<T>, U extends Base<U>> = [T, U]
 
 export const Tuple = {
   /**
