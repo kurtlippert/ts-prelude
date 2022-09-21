@@ -1,27 +1,7 @@
-import { Bool } from './Bool.ts'
-import { Num } from './Num.ts'
+// import { Bool } from './Bool.ts'
+// import { Num } from './Num.ts'
 import { Maybe, Just, Nothing } from './Maybe.ts'
-import { Arr } from './types/Arr.ts'
-import { Base } from "./types/Base.ts"
-import { Empty } from "./types/Empty.ts"
 
-// export function Arr<T>(arr: T[]): Arr<T> {
-//   return arr as unknown as Arr<T>
-// }
-
-// export function fromList<T extends Base>(list: T[]): Arr<T> {
-//   return list as Arr<T>
-// }
-
-/**
- * Returns an empty JS array.
- * 
- * @example
- * Arr.length(Arr.empty()) === 0
- */
-// export function empty(): Arr<Empty> {
-//   return [] as unknown as Arr<Empty>
-// }
 
 /**
  * Determine if an array is empty.
@@ -29,7 +9,7 @@ import { Empty } from "./types/Empty.ts"
  * @example
  * Arr.isEmpty(Arr.empty()) === true
  */
-export function isEmpty<T>(arr: T[]): Bool {
+export function isEmpty<T>(arr: T[]): boolean {
   return arr.length === 0
 }
 
@@ -39,8 +19,8 @@ export function isEmpty<T>(arr: T[]): Bool {
  * @example
  * Arr.length([1, 2, 3]) === 3
  */
-export function length<T extends Base>(arr: T[]): Num {
-  return arr.length as unknown as Num
+export function length<T>(arr: T[]): number {
+  return arr.length
 }
 
 /**
@@ -51,21 +31,21 @@ export function length<T extends Base>(arr: T[]): Num {
  * Arr.initialize(4, i => i * i) === [0,1,4,9]
  * Arr.initialize(4, () => 0)    === [0,0,0,0] 
  */
-export function initialize<T extends Base>(len: Num, fn: (a: Num) => T): Arr<T>
-export function initialize<T extends Base>(len: Num): (fn: (a: Num) => T) => Arr<T>
-export function initialize<T extends Base>(len: Num, fn?: (a: Num) => T): unknown {
+export function initialize<T>(len: number, fn: (a: number) => T): T[]
+export function initialize<T>(len: number): (fn: (a: number) => T) => T[]
+export function initialize<T>(len: number, fn?: (a: number) => T): unknown {
   if (fn !== undefined) {
-    const newArr: Arr<T> = []
-    for (let i = 0; i < (len as unknown as number); i++) {
-      newArr.push(fn(i as unknown as Num))
+    const newArr: T[] = []
+    for (let i = 0; i < len; i++) {
+      newArr.push(fn(i))
     }
     return newArr
   }
   else {
-    return function(fn: (a: Num) => T): Arr<T> {
-      const newArr: Arr<T> = []
-      for (let i = 0; i < (len as unknown as number); i++) {
-        newArr.push(fn(i as unknown as Num))
+    return function(fn: (a: number) => T): T[] {
+      const newArr: T[] = []
+      for (let i = 0; i < len; i++) {
+        newArr.push(fn(i))
       }
       return newArr
     }
@@ -81,20 +61,20 @@ export function initialize<T extends Base>(len: Num, fn?: (a: Num) => T): unknow
  * Arr.repeat(5, 0) === [0,0,0,0,0]
  * Arr.repeat(5, "cat") === ["cat","cat","cat"]
  */
-export function repeat<T extends Base>(a: Num, b: T): Arr<T>
-export function repeat<T extends Base>(a: Num): (b: T) => Arr<T>
-export function repeat<T extends Base>(a: Num, b?: T): unknown {
+export function repeat<T>(a: number, b: T): T[]
+export function repeat<T>(a: number): (b: T) => T[]
+export function repeat<T>(a: number, b?: T): unknown {
   if (b !== undefined) {
-    const newArr: Arr<T> = [] as unknown as Arr<T>
-    for (let i = 0; i < (a as unknown as number); i++) {
+    const newArr: T[] = []
+    for (let i = 0; i < a; i++) {
       newArr.push(b)
     }
     return newArr
   }
   else {
-    return function(b: T): Arr<T> {
-      const newArr: Arr<T> = [] as unknown as Arr<T>
-      for (let i = 0; i < (a as unknown as number); i++) {
+    return function(b: T): T[] {
+      const newArr: T[] = []
+      for (let i = 0; i < a; i++) {
         newArr.push(b)
       }
       return newArr
@@ -111,12 +91,12 @@ export function repeat<T extends Base>(a: Num, b?: T): unknown {
  * Arr.get(5,  [0,1,2]) === Nothing
  * Arr.get(-1, [0,1,2]) === Nothing
  */
-export function get<T extends Base>(index: Num, arr: Arr<T>): Maybe<T>
-export function get<T extends Base>(index: Num): (arr: Arr<T>) => Maybe<T>
-export function get<T extends Base>(index: Num, arr?: Arr<T>): unknown {
+export function get<T>(index: number, arr: T[]): Maybe<T>
+export function get<T>(index: number): (arr: T[]) => Maybe<T>
+export function get<T>(index: number, arr?: T[]): unknown {
   if (arr !== undefined) {
-    if (arr[index as unknown as number] !== undefined) {
-      return Just(arr[index as unknown as number])
+    if (arr[index] !== undefined) {
+      return Just(arr[index])
     }
     else {
       return Nothing

@@ -6,7 +6,7 @@
  * Pipes the value of an expression into a pipeline of functions.
  * 
  * NOTE that this function only supports up to 20 things to pipe.
- * We can add more as needed ¯\_(ツ)_/¯
+ * We can add more as needed ¯\\_(ツ)_/¯
  *
  * @example
  * const len = (s: string): number => s.length

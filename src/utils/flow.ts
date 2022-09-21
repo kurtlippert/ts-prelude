@@ -7,7 +7,7 @@
  * The first argument may have any arity, the remaining arguments must be unary.  
  * 
  * NOTE that this function only supports up to 9 functions to compose.
- * We can add more as needed ¯\_(ツ)_/¯
+ * We can add more as needed ¯\\_(ツ)_/¯
  *
  * @example
  * const len = (s: string): number => s.length

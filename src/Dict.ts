@@ -12,9 +12,18 @@ import { Maybe, Just, Nothing, MaybeType } from './Maybe.ts'
  */
 export type Dict<T> = { [P in Str]?: T}
 
-export const d = <T>(a: Dict<T>) => a
-
-export const Dict = {
+/**
+ * 
+ * @example
+ * // Why not this?
+ * () => {}
+ *
+ * // B/c you want to be more explicit?
+ * Dict.empty()
+ */
+export function empty() {
+  return {}
+}
 
   empty: () => ({}),
 
@@ -167,4 +176,3 @@ export const Dict = {
   //     const a = rightFn('a')(1 as unknown as B)(0 as unknown as C)
   //   }
 
-}
