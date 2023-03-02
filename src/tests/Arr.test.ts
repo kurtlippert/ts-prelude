@@ -1,5 +1,4 @@
-
-import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
+import { expect, test } from 'bun-types';
 
 import * as Arr from "../Arr.ts"
 import { apply } from "../utils/apply.ts"
