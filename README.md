@@ -74,3 +74,6 @@ I don't expect these forms to be used often so I'm ok with it for now. Hopefully
 For now, I think I'm happy with the change.
 
 [bun.sh](https://bun.sh) is being used to run the code in place of [deno](https://deno.land) as an experiment. It's only really being used for it's testing capabilities so we're not really extending too far w/ this atm to judge it's utility.
+
+### Why `Arr.empty`? Why not just use `[]`
+Because for reasons not yet clear (at the time of writing) an empty array is typed like `never[]` instead of the more logical `unknown[]` by default in TypeScript
