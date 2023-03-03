@@ -1,4 +1,16 @@
-import { Bool } from './Bool.ts'
+// import { Bool } from "Bool"
+
+export function add(a: number): (b: number) => number
+export function add(a: number, b?: number): unknown {
+  if (b) {
+    return a + b
+  }
+  else {
+    return function(altB: number) {
+      return a + altB
+    }
+  }
+}
 
 
 // export function fromNum

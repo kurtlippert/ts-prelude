@@ -66,3 +66,11 @@ base type: `[T, U]`
 
 inspired by: 
 https://github.com/NoRedInk/haskell-libraries/blob/trunk/nri-prelude/src/Tuple.hs
+
+### 'v4-bun' branch
+Deviating from the api I'd originally envisioned toward one that makes use of [function overloads](https://www.typescriptlang.org/docs/handbook/2/functions.html#overload-signatures-and-the-implementation-signature).
+I've discovered that for particular signatures, I'm unable to get typings to work decently so you might notice `_2` appended function signatures.
+I don't expect these forms to be used often so I'm ok with it for now. Hopefully the curry / partial application story gets better for TS.
+For now, I think I'm happy with the change.
+
+[bun.sh](https://bun.sh) is being used to run the code in place of [deno](https://deno.land) as an experiment. It's only really being used for it's testing capabilities so we're not really extending too far w/ this atm to judge it's utility.

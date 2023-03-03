@@ -11,7 +11,7 @@
  *   Num.add,
  *   Str.toInt("1"),
  *   Str.toInt("123")
- * )
+ * ) // = 124
  */
 export function apply<A, B>(ab: (a: A) => B, a: A): B
 export function apply<A, B, C>(ac: (a: A, b: B) => C, a: A, b: B): C

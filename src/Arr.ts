@@ -1,13 +1,13 @@
 // import { Bool } from './Bool.ts'
 // import { Num } from './Num.ts'
-import { Maybe, Just, Nothing } from './Maybe.ts'
+import { Maybe, Just, Nothing } from "Maybe"
 
 
 /**
  * Determine if an array is empty.
  * 
  * @example
- * Arr.isEmpty(Arr.empty()) === true
+ * Arr.isEmpty([]) // = true
  */
 export function isEmpty<T>(arr: T[]): boolean {
   return arr.length === 0
@@ -17,7 +17,7 @@ export function isEmpty<T>(arr: T[]): boolean {
  * Return the length of an array
  * 
  * @example
- * Arr.length([1, 2, 3]) === 3
+ * Arr.length([1, 2, 3]) // = 3
  */
 export function length<T>(arr: T[]): number {
   return arr.length
@@ -27,9 +27,9 @@ export function length<T>(arr: T[]): number {
  * Initialize an array.
  * 
  * @example
- * Arr.initialize(4, i => i + 1) === [0,1,2,3]
- * Arr.initialize(4, i => i * i) === [0,1,4,9]
- * Arr.initialize(4, () => 0)    === [0,0,0,0] 
+ * Arr.initialize(4, i => i + 1) // = [0,1,2,3]
+ * Arr.initialize(4, i => i * i) // = [0,1,4,9]
+ * Arr.initialize(4, () => 0)    // = [0,0,0,0] 
  */
 export function initialize<T>(len: number, fn: (a: number) => T): T[]
 export function initialize<T>(len: number): (fn: (a: number) => T) => T[]
@@ -56,6 +56,7 @@ export function initialize<T>(len: number, fn?: (a: number) => T): unknown {
  * Creates an array with a given length, filled with a default element.  
  * 
  * NOTE that `Arr.repeat(3, "cat")` would be the same as `Arr.initialize(3, () => "cat")`
+ * TODO: Add partial application overloads
  * 
  * @example
  * Arr.repeat(5, 0) === [0,0,0,0,0]
@@ -103,7 +104,7 @@ export function get<T>(index: number, arr?: T[]): unknown {
     }
   }
   else {
-    return function(arr: Arr<T>): Maybe<T> {
+    return function(arr: T[]): Maybe<T> {
       if (arr[index as unknown as number] !== undefined) {
         return Just(arr[index as unknown as number])
       }
@@ -134,11 +135,11 @@ export function get<T>(index: number, arr?: T[]): unknown {
  * 
  * Arr.set(1)(7)([1,2,3]) // <- must do this (working on a fix)
  */
-export function set<T extends Base>(index: Num, element: T, arr: Arr<T>): Arr<T>
-export function set<T extends Base>(index: Num, element: T): (arr: Arr<T>) => Arr<T>
-export function set<T extends Base>(index: Num): (element: T) => (arr: Arr<T>) => Arr<T>
-export function set<T extends Base>(index: Num, element?: T, arr?: Arr<T>): unknown {
-  const newArr: Arr<T> = []
+export function set<T>(index: number, element: T, arr: T[]): T[]
+export function set<T>(index: number, element: T): (arr: T[]) => T[]
+export function set<T>(index: number): (element: T) => (arr: T[]) => T[]
+export function set<T>(index: number, element?: T, arr?: T[]): unknown {
+  const newArr: T[] = []
   if (element !== undefined && arr !== undefined) {
     for (let i = 0; i < arr.length; i++) {
       if (i === index) {
@@ -151,7 +152,7 @@ export function set<T extends Base>(index: Num, element?: T, arr?: Arr<T>): unkn
     return newArr
   }
   else if (element !== undefined && arr === undefined) {
-    return function(arr: Arr<T>): Arr<T> {
+    return function(arr: T[]): T[] {
       for (let i = 0; i < arr.length; i++) {
         if (i === index) {
           newArr.push(element)
@@ -164,8 +165,8 @@ export function set<T extends Base>(index: Num, element?: T, arr?: Arr<T>): unkn
     }
   }
   else if (element === undefined && arr === undefined) {
-    return function(element: T): (arr: Arr<T>) => Arr<T> {
-      return function(arr: Arr<T>): Arr<T> {
+    return function(element: T): (arr: T[]) => T[] {
+      return function(arr: T[]): T[] {
         for (let i = 0; i < arr.length; i++) {
           if (i === index) {
             newArr.push(element)
@@ -189,10 +190,10 @@ export function set<T extends Base>(index: Num, element?: T, arr?: Arr<T>): unkn
  * @example
  * Arr.set_2(1)(7, [0,1,2])
  */
-export function set_2<T extends Base>(index: Num): (element: T, arr: Arr<T>) => Arr<T>
-export function set_2<T extends Base>(index: Num): unknown {
-  const newArr: Arr<T> = []
-  return function(element: T, arr?: Arr<T>): unknown {
+export function set_2<T>(index: number): (element: T, arr: T[]) => T[]
+export function set_2<T>(index: number): unknown {
+  const newArr: T[] = []
+  return function(element: T, arr?: T[]): unknown {
     if (arr !== undefined) {
       for (let i = 0; i < arr.length; i++) {
         if (i === index) {
@@ -205,7 +206,7 @@ export function set_2<T extends Base>(index: Num): unknown {
       return newArr
     }
     else {
-      return function(arr: Arr<T>): Arr<T> {
+      return function(arr: T[]): T[] {
         for (let i = 0; i < arr.length; i++) {
           if (i === index) {
             newArr.push(element)
@@ -223,21 +224,77 @@ export function set_2<T extends Base>(index: Num): unknown {
 /**
  * Push an element onto the end of an array.
  * 
+ * TODO: Add partial application overloads
+ * 
  * @example
  * Arr.push(3, [1,2]) === [1,2,3]
  */
-export function push<T extends Base>(element: T, arr: Arr<T>): Arr<T>
-export function push<T extends Base>(element: T): (arr: Arr<T>) => Arr<T>
-export function push<T extends Base>(element: T, arr?: Arr<T>): unknown {
+export function push<T>(element: T, arr: T[]): T[]
+export function push<T>(element: T): (arr: T[]) => T[]
+export function push<T>(element: T, arr?: T[]): unknown {
   if (arr !== undefined) {
     return [...arr, element]
   }
   else {
-    return function(arr: Arr<T>): Arr<T> {
+    return function(arr: T[]): T[] {
       return [...arr, element]
     }
   }
 }
+
+/**
+ * Prepend a value to an array.
+ * 
+ * TODO: Look into faster solutions.
+ * 
+ * @example
+ * Arr.prepend(0, [1,2,3]) // = [0,1,2,3]
+ * Arr.prepend(0)([1,2,3]) // = [0,1,2,3]
+ */
+export function prepend<T>(element: T): (arr: T[]) => T[]
+export function prepend<T>(element: T, arr?: T[]): unknown {
+  if (arr) {
+    const newArr = arr.slice()
+    newArr.unshift(element)
+    return newArr
+  }
+  else {
+    return function(arr: T[]): T[] {
+      const newArr = arr.slice()
+      newArr.unshift(element)
+      return newArr
+    }
+  }
+}
+
+/**
+ * Reduce an array from the left. Read @foldl@ as fold from the left.
+ * 
+ * @example
+ * Arr.foldl(Arr.prepend, [], [1,2,3]) // = [3,2,1]
+ * Arr.foldl(Arr.prepend, [])([1,2,3]) // = [3,2,1]
+ * Arr.foldl(Arr.prepend)([])([1,2,3]) // = [3,2,1]
+ */
+export function foldl<a, b>(fn: (_: a) => (_: b) => b, acc: b): (arr: a[]) => b
+export function foldl<a, b>(fn: (_: a) => (_: b) => b): (acc: b) => (arr: a[]) => b
+export function foldl<a, b>(fn: (_: a) => (_: b) => b, acc?: b, arr?: a[]): unknown {
+  if (arr.length === 0) return acc
+  let newArr = fn(arr[0])(acc)
+  for (let i = 1; i < arr.length; i++) {
+    newArr = fn(arr[i])(newArr)
+  }
+  return newArr
+}
+
+/**
+ * Set the element at a particular index. Returns an updated array.  
+ * If the index is out of range, the array is unaltered.  
+ * 
+ * **ONLY ALLOWS THE FORM `(a) -> (b, c)`**  
+ * **Use `set` for the other forms**
+ * @example
+ * Arr.set_2(1)(7, [0,1,2])
+ */
 
 // foldl: <T, U>(fn: (_: U) => (_: T) => U) => (acc: U) => (arr: Arr<T>): U => {
 //   if (arr.length === 0) return acc
