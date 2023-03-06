@@ -2,6 +2,9 @@
 // import { Num } from './Num.ts'
 import { Maybe, Just, Nothing } from "Maybe"
 
+export function empty<a>(): a[] {
+  return [] as a[]
+}
 
 /**
  * Determine if an array is empty.
@@ -271,19 +274,50 @@ export function prepend<T>(element: T, arr?: T[]): unknown {
  * Reduce an array from the left. Read @foldl@ as fold from the left.
  * 
  * @example
+ * // 3 forms
+ * Arr.foldl(Num.add, 0, [1,2,3]) // = 6
+ * Arr.foldl(Num.add, 0)([1,2,3]) // = 6 
+ * Arr.foldl(Num.add)(0)([1,2,3]) // = 6
+ * 
+ * // 3 forms
  * Arr.foldl(Arr.prepend, [], [1,2,3]) // = [3,2,1]
  * Arr.foldl(Arr.prepend, [])([1,2,3]) // = [3,2,1]
  * Arr.foldl(Arr.prepend)([])([1,2,3]) // = [3,2,1]
  */
-export function foldl<a, b>(fn: (_: a) => (_: b) => b, acc: b): (arr: a[]) => b
-export function foldl<a, b>(fn: (_: a) => (_: b) => b): (acc: b) => (arr: a[]) => b
-export function foldl<a, b>(fn: (_: a) => (_: b) => b, acc?: b, arr?: a[]): unknown {
-  if (arr.length === 0) return acc
-  let newArr = fn(arr[0])(acc)
-  for (let i = 1; i < arr.length; i++) {
-    newArr = fn(arr[i])(newArr)
+export function foldl<a, b>(fn: (a: a) => (b: b) => b, acc: b, arr: a[]): b
+export function foldl<a, b>(fn: (a: a) => (b: b) => b, acc: b): (arr: a[]) => b
+export function foldl<a, b>(fn: (a: a) => (b: b) => b): (acc: b) => (arr: a[]) => b
+export function foldl<a, b>(fn: (a: a) => (b: b) => b, acc?: b, arr?: a[]): unknown {
+  if (acc !== undefined && arr !== undefined) {
+    if (arr.length === 0) return acc
+    let newArr = fn(arr[0])(acc)
+    for (let i = 1; i < arr.length; i++) {
+      newArr = fn(arr[i])(newArr)
+    }
+    return newArr
   }
-  return newArr
+  else if (acc !== undefined && arr === undefined) {
+    return function(arr: a[]): b {
+      if (arr.length === 0) return acc
+      let newArr = fn(arr[0])(acc)
+      for (let i = 1; i < arr.length; i++) {
+        newArr = fn(arr[i])(newArr)
+      }
+      return newArr
+    }
+  }
+  else if (acc === undefined && arr === undefined) {
+    return function(acc: b): (arr: a[]) => b {
+      return function(arr: a[]): b {
+        if (arr.length === 0) return acc
+        let newArr = fn(arr[0])(acc)
+        for (let i = 1; i < arr.length; i++) {
+          newArr = fn(arr[i])(newArr)
+        }
+        return newArr
+      }
+    }
+  }
 }
 
 /**

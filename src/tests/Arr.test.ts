@@ -25,8 +25,17 @@ test("'Arr' 'initialize' tests", () => {
 })
 
 test("'Arr' 'foldl' tests", () => {
+  // 3 forms
   expect(Arr.foldl(Num.add, 0, [1,2,3])).toEqual(6)
+  expect(Arr.foldl(Num.add, 0)([1,2,3])).toEqual(6)
+  expect(Arr.foldl(Num.add)(0)([1,2,3])).toEqual(6)
+
   expect(Arr.foldl(Arr.prepend, [], [1,2,3])).toEqual([3,2,1])
+  expect(Arr.foldl(Arr.prepend, [])([1,2,3])).toEqual([3,2,1])
+
+  // TODO: figure out how to avoid the cast
+  expect(Arr.foldl(Arr.prepend)([] as number[])([1,2,3])).toEqual([3,2,1])
+
   // expect(apply(Arr.initialize, 4, () => 0)).toEqual([0,0,0,0])
   // expect(pipe(4, Arr.initialize)(() => 0)).toEqual([0,0,0,0])
   // expect(flow(Arr.initialize(4), Arr.length)(() => 0)).toEqual(4)
