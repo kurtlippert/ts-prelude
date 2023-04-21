@@ -1,6 +1,6 @@
 import { Num } from './Num.ts'
 import { List } from './List.ts'
-import { Maybe, Just, Nothing } from './Maybe.ts'
+import { Maybe, Just, Nothing } from './Monad.ts/index'
 import { Tuple } from './Tuple.ts'
 
 export type Str = string

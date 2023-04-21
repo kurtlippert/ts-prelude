@@ -2,7 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 
 import { Dict } from "../Dict.ts"
 import { Num } from "../Num.ts"
-import { Just, Maybe, Nothing } from '../Maybe.ts'
+import { Just, Maybe, Nothing } from '../Monad.ts/index'
 import { Str } from "../Str.ts";
 import { pipe } from "../utils/pipe.ts";
  

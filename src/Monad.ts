@@ -6,7 +6,7 @@ export enum MaybeType {
 /**
  * Holds some value
  */
-export interface Just<T> {
+export type Just<T> = {
   type: typeof MaybeType.Just
   value: T
 }
@@ -14,7 +14,7 @@ export interface Just<T> {
 /**
  * Represents the absence of a value
  */
-export interface Nothing {
+export type Nothing = {
   type: typeof MaybeType.Nothing
 }
 
@@ -27,23 +27,19 @@ export type Maybe<T>
   | Nothing
 
 
-export const Nothing: Nothing = {
+export const nothing = (): Nothing => ({
   type: MaybeType.Nothing
-}
+})
 
 /**
  * Holds some value
  */
-export const Just = <T>(value: T): Just<T> => ({
+export const just = <T>(value: T): Just<T> => ({
   type: MaybeType.Just,
-  value,
+  value
 })
 
-// TODO: replace w/ module (i.e "import { withDefault } from 'ts-prelude/Maybe'")
-// TODO: replace w/ module (i.e "import { Maybe } from 'ts-prelude'")
-// ^^ Usage: `Maybe.withDefault`
 export const Maybe = {
-
   /**
    * "unfolds" the Maybe into the value (if Just), the default otherwise  
    * 
@@ -80,23 +76,23 @@ export const Maybe = {
     // deno-lint-ignore no-extra-boolean-cast
     if (!!result) {
       const newResult = result as T
-      return Just(fn(newResult))
+      return just(fn(newResult))
     } else {
-      return Nothing
+      return nothing()
     }
   },
 
-/**
- * Apply a function if all the arguments are @Just@ a value.
- *
- * @example
- * Maybe.map2(Math.add)(Just(3))(Just(4)) === Just(7)
- * Maybe.map2(Num.add)(Just(3))(Nothing) === Nothing
- * Maybe.map2(Num.add)(Nothing)(Just(4)) === Nothing
- * Maybe.map2(Num.add)(Str.toInt("1"))(Str.toInt("123")) === Just(124)
- * Maybe.map2(Num.add)(Str.toInt("x"))(Str.toInt("123")) === Nothing
- * Maybe.map2(Num.add)(Str.toInt("1"))(Str.toInt("1.3")) === Nothing
- */
+  /**
+   * Apply a function if all the arguments are @Just@ a value.
+   *
+   * @example
+   * Maybe.map2(Math.add)(Just(3))(Just(4)) === Just(7)
+   * Maybe.map2(Num.add)(Just(3))(Nothing) === Nothing
+   * Maybe.map2(Num.add)(Nothing)(Just(4)) === Nothing
+   * Maybe.map2(Num.add)(Str.toInt("1"))(Str.toInt("123")) === Just(124)
+   * Maybe.map2(Num.add)(Str.toInt("x"))(Str.toInt("123")) === Nothing
+   * Maybe.map2(Num.add)(Str.toInt("1"))(Str.toInt("1.3")) === Nothing
+   */
   map2: <T, U, V>(fn: (p1: T) => (p2: U) => V) => (m1: Maybe<T>) => (m2: Maybe<U>): Maybe<V> => {
     const result1 = m1.type === MaybeType.Just ? m1.value : undefined
     const result2 = m2.type === MaybeType.Just ? m2.value : undefined
@@ -104,10 +100,10 @@ export const Maybe = {
     if (!!result1 && !!result2) {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
-      return Just(fn(newResult1)(newResult2))
+      return just(fn(newResult1)(newResult2))
     }
     else {
-      return Nothing
+      return nothing()
     }
   },
 
@@ -120,10 +116,10 @@ export const Maybe = {
       const newResult1 = result1 as T
       const newResult2 = result2 as U
       const newResult3 = result3 as V
-      return Just(fn(newResult1)(newResult2)(newResult3))
+      return just(fn(newResult1)(newResult2)(newResult3))
     }
     else {
-      return Nothing
+      return nothing()
     }
   },
 
@@ -138,10 +134,10 @@ export const Maybe = {
       const newResult2 = result2 as U
       const newResult3 = result3 as V
       const newResult4 = result4 as W
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4))
+      return just(fn(newResult1)(newResult2)(newResult3)(newResult4))
     }
     else {
-      return Nothing
+      return nothing()
     }
   },
 
@@ -158,10 +154,10 @@ export const Maybe = {
       const newResult3 = result3 as V
       const newResult4 = result4 as W
       const newResult5 = result5 as X
-      return Just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5))
+      return just(fn(newResult1)(newResult2)(newResult3)(newResult4)(newResult5))
     }
     else {
-      return Nothing
+      return nothing()
     }
   },
 
@@ -183,5 +179,5 @@ export const Maybe = {
   andThen: <T, U>(callback: (p1: T) => Maybe<U>) => (m1: Maybe<T>) =>
     m1.type === MaybeType.Just
       ? callback(m1.value)
-      : Nothing,
+      : nothing()
 }

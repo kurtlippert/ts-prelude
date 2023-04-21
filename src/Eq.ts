@@ -4,7 +4,7 @@ import { Bool } from './Bool.ts'
 import { List } from './List.ts'
 import { Tuple } from './Tuple.ts'
 import { Dict } from './Dict.ts'
-import { Maybe } from './Maybe.ts'
+import { Maybe } from './Monad.ts/index'
 
 export type EqBaseType
   = Str

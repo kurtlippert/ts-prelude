@@ -1,6 +1,6 @@
 // import { Num } from './Num.ts'
 // import { Bool } from './Bool.ts'
-// import { Maybe, MaybeType, Just, Nothing } from './Maybe.ts'
+import { Maybe, just, nothing } from './Monad'
 // import { Eq } from './Eq.ts'
 // import { Ord } from './Ord.ts'
 // import { Tuple } from './Tuple.ts'
@@ -18,16 +18,100 @@ import { curry } from "./utils/curry";
 //   })(num, a);
 // }
 
-export type Repeat = 
-  | (<A>(num: number, a: A) => A[])
-  | (<A>(num: number) => (a: A) => A[])
-export const repeat: Repeat = curry(<A>(num: number, a: A) => {
-  const list = []
-  for (let i = 0; i < num; i++) {
-    list.push(a)
+export const isEmpty = <T>(t: T[]) =>
+  t.length === 0
+
+export const length = <T>(t: T[]) =>
+  t.length
+
+export type Init = {
+  <T>(size: number, initFn: (index: number) => T): T[];
+  <T>(size: number): <U extends T>(initFn: (index: number) => U) => U[];
+}
+
+export const init: Init = curry(<T>(size: number, initFn: (i: number) => T): T[] =>
+  Array(size).fill(0).map((value, index) => initFn(index)));
+
+export type Repeat = {
+  <T>(size: number, item: T): T[];
+  <T>(size: number): <U extends T>(item: U) => U[];
+}
+
+export const repeat: Repeat = curry(<T>(size: number, item: T) =>
+  Array(size).fill(item));
+
+export type Get = {
+  <T>(index: number, itemArray: T[]): Maybe<T>;
+  <T>(index: number): <U extends T>(itemArray: U[]) => Maybe<U>;
+}
+
+export const get: Get = curry(<T>(index: number, t: T[]): Maybe<T> => {
+  if (t[index] !== undefined) {
+    return just(t[index])
   }
-  return list
-});
+  else {
+    return nothing()
+  }
+})
+
+export type Set = {
+  <T>(index: number, item: T, itemArray: T[]): T[];
+  <T>(index: number, item: T): (itemArray: T[]) => T[];
+  <T>(index: number): {
+    <U extends T>(item: U, itemArray: U[]): U[];
+    <U extends T>(item: U): (itemArray: U[]) => U[];
+  }
+}
+
+export const set: Set = curry(<T>(index: number, item: T, itemArray: T[]): T[] => {
+  if (itemArray[index] !== undefined) {
+    return itemArray.map((v, i) => i === index ? item : v)
+  }
+  else {
+    return itemArray
+  }
+})
+
+export type Push = {
+  <T>(item: T, list: T[]): T[];
+  <T>(item: T): (list: T[]) => T[];
+}
+
+export const push: Push = curry(<T>(item: T, list: T[]): T[] => [...list, item])
+
+export type Prepend = {
+  <T>(item: T, list: T[]): T[];
+  <T>(item: T): (list: T[]) => T[];
+}
+
+export const prepend: Prepend = curry(<T>(item: T, list: T[]): T[] => [item, ...list])
+
+export type FoldFn<T, U> = {
+  (t: T, u: U): U;
+  (t: T): (u: U) => U;
+}
+
+export type Fold = {
+  <T, U>(foldFn: FoldFn<T, U>, initial: U, list: T[]): U;
+  <T, U>(foldFn: FoldFn<T, U>, initial: U): (list: T[]) => U;
+  <T, U>(foldFn: FoldFn<T, U>): {
+    <V extends T, W extends U>(initial: V, list: W[]): W;
+    <V extends T, W extends U>(initial: V): (list: W[]) => W;
+  }
+}
+
+export const foldr: Fold = curry(<T, U>(foldFn: FoldFn<T, U>, initial: U, list: T[]): U =>
+  list.reduceRight((acc, cur) => foldFn(cur, acc), initial))
+
+export const foldl: Fold = curry(<T, U>(foldFn: FoldFn<T, U>, initial: U, list: T[]): U =>
+  list.reduce((acc, cur) => foldFn(cur, acc), initial))
+
+// export type Range = {
+//   (a: number, b: number): b[];
+//   (a: number): (b: number) => number[];
+// }
+
+// export const range: Range = curry(<T>(a: number, b: number) => Array(n).fill(t))
 
 /**
  * TODO
@@ -47,20 +131,20 @@ export const repeat: Repeat = curry(<A>(num: number, a: A) => {
 //   return list
 // });
 
-export function range<A>(num: number, a: A): A[]
-export function range<A>(num: number): (a: A) => A[]
-export function range(): unknown {
-  return curry(function<A>(num: number, a: A) {
-    const list = []
-    for (let i = 0; i < num; i++) {
-      list.push(a)
-    }
-    return list 
-  })
-}
+// export function range<A>(num: number, a: A): A[]
+// export function range<A>(num: number): (a: A) => A[]
+// export function range(): unknown {
+//   return curry(function<A>(num: number, a: A) {
+//     const list = []
+//     for (let i = 0; i < num; i++) {
+//       list.push(a)
+//     }
+//     return list 
+//   })
+// }
 
-range(1, [2])
-range(1)('foo')
+// range(1, [2])
+// range(1)('foo')
 
 
 // export const List = {

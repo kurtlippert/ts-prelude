@@ -22,7 +22,8 @@
     // path stuff
     "paths": {
       "Arr": ["./src/Arr.ts"],
-      "Maybe": ["./src/Maybe.ts"],
+      "List": ["./src/List.ts"],
+      "Monad": ["./src/Monad.ts"],
       "Dict": ["./src/Dict.ts"],
       "Num": ["./src/Num.ts"],
       "Str": ["./src/Str.ts"],

@@ -1,17 +1,27 @@
 // import { Bool } from "Bool"
 
-export function add(a: number): (b: number) => number
-export function add(a: number, b: number): number
-export function add(a: number, b?: number): unknown {
-  if (b) {
-    return a + b
-  }
-  else {
-    return function(b: number) {
-      return a + b
-    }
-  }
+import { Maybe } from "Monad";
+import { curry } from "./utils/curry";
+
+export type Add = {
+  (a: number, b: number): number;
+  (a: number): (b: number) => number;
 }
+
+export const add: Add = curry((a: number, b: number): number => a + b);
+
+// export function add(a: number): (b: number) => number
+// export function add(a: number, b: number): number
+// export function add(a: number, b?: number): unknown {
+//   if (b) {
+//     return a + b
+//   }
+//   else {
+//     return function(b: number) {
+//       return a + b
+//     }
+//   }
+// }
 
 
 // export function fromNum

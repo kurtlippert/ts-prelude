@@ -1,6 +1,6 @@
 // import { Bool } from './Bool.ts'
 // import { Num } from './Num.ts'
-import { Maybe, Just, Nothing } from "Maybe"
+import { Maybe, Just, Nothing } from "./Monad"
 
 export function empty<a>(): a[] {
   return [] as a[]

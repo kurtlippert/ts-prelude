@@ -4,7 +4,7 @@ import { Str } from '../../Str.ts'
 import { Num } from '../../Num.ts'
 
 import { apply as ap } from "../../utils/apply.ts";
-import { Just, Maybe } from "../../Maybe.ts";
+import { Just, Maybe } from "../../Monad.ts/index";
 
 Deno.test("'apply' function", () => {
   const add = (a: number) => (b: number): Num => a + b

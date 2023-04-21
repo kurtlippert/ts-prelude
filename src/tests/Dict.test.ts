@@ -2,7 +2,7 @@ import { assertEquals, assert } from "https://deno.land/std@0.156.0/testing/asse
 
 import { Dict } from "../Dict.ts"
 import { Num } from "../Num.ts"
-import { Maybe } from '../Maybe.ts'
+import { Maybe } from '../Monad.ts/index'
  
 Deno.test("'Dict' 'fromList' tests", () => {
   assertEquals(

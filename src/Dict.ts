@@ -2,7 +2,7 @@ import { Str } from './Str.ts'
 import { Num } from './Num.ts'
 import { Bool } from './Bool.ts'
 import { List } from './List.ts'
-import { Maybe, Just, Nothing, MaybeType } from './Maybe.ts'
+import { Maybe, Just, Nothing, MaybeType } from './Monad.ts/index'
 
 /**
  * Doesn't really make sense to allow the key to be
